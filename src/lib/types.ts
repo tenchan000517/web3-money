@@ -29,6 +29,10 @@ export interface Applicant {
     reason?: string;
     amount?: number;
     voteCount?: number;
+    weightedVoteScore?: number; // 🆕 重み付き投票スコア
+    basicVoteCount?: number; // 🆕 基本ページからの投票数
+    premiumVoteCount?: number; // 🆕 プレミアムページからの投票数
+    youtubeOptInCount?: number; // 🆕 YouTube出演希望数
     [key: string]: unknown; // 動的フィールド対応
 }
 
@@ -58,6 +62,9 @@ export interface UserVote {
     campaignId: string;
     applicantId: string;
     votedAt: string;
+    votePage: 'basic' | 'premium'; // 🆕 投票したページ（基本 or プレミアム）
+    voteWeight: number; // 🆕 投票の重み（basic: 1, premium: 5）
+    youtubeOptIn?: boolean; // 🆕 YouTube出演選択（プレミアムページのみ）
 }
 
 export interface CampaignSettings {
@@ -65,6 +72,9 @@ export interface CampaignSettings {
     allowMultipleVotes: boolean;
     maxVotesPerUser: number;
     createdAt?: string;
+    enableTwoPageVoting?: boolean; // 🆕 2ページ投票システムの有効化
+    basicPageWeight?: number; // 🆕 基本ページの投票重み（デフォルト: 1）
+    premiumPageWeight?: number; // 🆕 プレミアムページの投票重み（デフォルト: 5）
 }
 
 export interface VoteEligibilityCheck {
@@ -148,6 +158,16 @@ export interface VotingCardProps {
     campaignId: string;
     rank: number;
     onVoteSuccess: () => void;
+    votePage?: 'basic' | 'premium'; // 🆕 どのページから投票するか
+    showWeightedScore?: boolean; // 🆕 重み付きスコアを表示するか
+}
+
+// 🆕 YouTube出演選択モーダル用
+export interface YouTubeOptInModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: (optIn: boolean) => void;
+    applicantName: string;
 }
 
 // 🆕 ユーザーセッションキャッシュ

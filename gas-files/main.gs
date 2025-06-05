@@ -103,7 +103,20 @@ function handleRequest(method, params, data = null) {
         
       // 投票API
       case 'POST:votes':
-        result = addVote(data.campaignId, data.applicantId);
+        result = addVote(data.campaignId, data.applicantId, data.votePage);
+        break;
+      
+      // 認証付き投票API
+      case 'POST:authenticated-vote':
+        result = addAuthenticatedVote(
+          data.financeId, 
+          data.email, 
+          data.name, 
+          data.campaignId, 
+          data.applicantId,
+          data.votePage || 'basic',
+          data.youtubeOptIn || false
+        );
         break;
         
       // フォーム連携API

@@ -234,3 +234,58 @@ function canUserVote(financeId, campaignId, applicantId) {
     };
   }
 }
+
+/**
+ * ページ別投票可能性チェック
+ * 各ページ（basic/premium）で1回ずつ投票可能
+ */
+function canUserVoteOnPage(financeId, campaignId, applicantId, votePage) {
+  try {
+    logInfo(`Checking if user can vote on page: ${financeId} for ${applicantId} on ${votePage}`);
+    
+    // 基本的な投票可能性チェック（キャンペーン状態など）
+    const basicEligibility = canUserVote(financeId, campaignId, applicantId);
+    if (!basicEligibility.canVote && !basicEligibility.reason.includes('既に投票済み')) {
+      return basicEligibility;
+    }
+    
+    // ユーザーの存在確認
+    const user = getUserByFinanceId(financeId);
+    if (!user) {
+      // 新規ユーザーは投票可能
+      return { canVote: true, reason: null };
+    }
+    
+    // ページ別の投票履歴確認
+    const userVotes = getUserVoteHistory(financeId, campaignId);
+    const pageVotes = userVotes.filter(vote => vote.votePage === votePage);
+    
+    // 同一ページから同一申請者への投票チェック
+    const hasVotedOnPage = pageVotes.some(vote => vote.applicantId === applicantId);
+    if (hasVotedOnPage) {
+      return {
+        canVote: false,
+        reason: `この${votePage === 'basic' ? '基本' : 'プレミアム'}ページから既に投票済みです`
+      };
+    }
+    
+    // キャンペーン設定の確認
+    const settings = getCampaignSettings(campaignId);
+    
+    // 2ページ投票システムが有効な場合
+    if (settings.enableTwoPageVoting) {
+      // 各ページで1回ずつ投票可能
+      return { canVote: true, reason: null };
+    }
+    
+    // 通常の投票制限を適用
+    return basicEligibility;
+    
+  } catch (error) {
+    logError('Failed to check if user can vote on page', error);
+    return {
+      canVote: false,
+      reason: '投票可能性のチェックに失敗しました'
+    };
+  }
+}
