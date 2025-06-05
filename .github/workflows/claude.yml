@@ -1,0 +1,30 @@
+name: Claude Code Assistant
+
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created, edited]
+  pull_request:
+    types: [opened, edited, synchronize]
+  pull_request_review_comment:
+    types: [created, edited]
+
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    if: contains(github.event.comment.body, '@claude') || contains(github.event.issue.body, '@claude') || contains(github.event.pull_request.body, '@claude')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Claude Code Action
+        uses: grll/claude-code-action@beta
+        with:
+          access_token: ${{ secrets.CLAUDE_ACCESS_TOKEN }}
+          refresh_token: ${{ secrets.CLAUDE_REFRESH_TOKEN }}
+          expires_at: ${{ secrets.CLAUDE_EXPIRES_AT }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
