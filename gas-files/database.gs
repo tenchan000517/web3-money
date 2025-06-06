@@ -60,14 +60,51 @@ function initializeSheet(sheet, sheetName) {
         break;
         
       case 'votes':
-        sheet.getRange(1, 1, 1, 5).setValues([[
-          'ID', 'CampaignId', 'ApplicantId', 'VoteCount', 'UpdatedAt'
+        sheet.getRange(1, 1, 1, 10).setValues([[
+          'ID', 'CampaignId', 'ApplicantId', 'VoteCount', 'UpdatedAt', 
+          'Reserved', 'WeightedScore', 'BasicVoteCount', 'PremiumVoteCount', 'YoutubeOptInCount'
         ]]);
         // ヘッダー行のスタイル設定
-        const voteHeader = sheet.getRange(1, 1, 1, 5);
+        const voteHeader = sheet.getRange(1, 1, 1, 10);
         voteHeader.setBackground('#ea4335');
         voteHeader.setFontColor('white');
         voteHeader.setFontWeight('bold');
+        sheet.setFrozenRows(1);
+        break;
+        
+      case 'user_votes':
+        sheet.getRange(1, 1, 1, 9).setValues([[
+          'ID', 'FinanceId', 'Email', 'CampaignId', 'ApplicantId', 'VotedAt', 'VotePage', 'VoteWeight', 'YoutubeOptIn'
+        ]]);
+        // ヘッダー行のスタイル設定
+        const userVoteHeader = sheet.getRange(1, 1, 1, 9);
+        userVoteHeader.setBackground('#fbbc04');
+        userVoteHeader.setFontColor('white');
+        userVoteHeader.setFontWeight('bold');
+        sheet.setFrozenRows(1);
+        break;
+        
+      case 'users':
+        sheet.getRange(1, 1, 1, 6).setValues([[
+          'ID', 'FinanceId', 'Email', 'Name', 'CreatedAt', 'LastLoginAt'
+        ]]);
+        // ヘッダー行のスタイル設定
+        const userHeader = sheet.getRange(1, 1, 1, 6);
+        userHeader.setBackground('#9c27b0');
+        userHeader.setFontColor('white');
+        userHeader.setFontWeight('bold');
+        sheet.setFrozenRows(1);
+        break;
+        
+      case 'campaign_settings':
+        sheet.getRange(1, 1, 1, 7).setValues([[
+          'CampaignId', 'AllowMultipleVotes', 'MaxVotesPerUser', 'EnableTwoPageVoting', 'BasicPageWeight', 'PremiumPageWeight', 'CreatedAt'
+        ]]);
+        // ヘッダー行のスタイル設定
+        const settingsHeader = sheet.getRange(1, 1, 1, 7);
+        settingsHeader.setBackground('#00acc1');
+        settingsHeader.setFontColor('white');
+        settingsHeader.setFontWeight('bold');
         sheet.setFrozenRows(1);
         break;
         

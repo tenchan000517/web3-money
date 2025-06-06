@@ -4,11 +4,11 @@
  */
 
 /**
- * 投票追加
+ * 投票追加（重み付き対応）
  */
-function addVote(campaignId, applicantId) {
+function addVote(campaignId, applicantId, votePage = 'basic', youtubeOptIn = false) {
   try {
-    logInfo(`Adding vote: campaign=${campaignId}, applicant=${applicantId}`);
+    logInfo(`Adding vote: campaign=${campaignId}, applicant=${applicantId}, page=${votePage}, youtubeOptIn=${youtubeOptIn}`);
     
     // パラメータ検証
     if (!campaignId || typeof campaignId !== 'string') {
@@ -17,6 +17,10 @@ function addVote(campaignId, applicantId) {
     
     if (!applicantId || typeof applicantId !== 'string') {
       throw new Error('無効な申請者IDです');
+    }
+    
+    if (!['basic', 'premium'].includes(votePage)) {
+      throw new Error('無効な投票ページです');
     }
     
     // キャンペーンの存在・ステータス確認
@@ -39,6 +43,10 @@ function addVote(campaignId, applicantId) {
       throw new Error('投票期間が終了しています');
     }
     
+    // キャンペーン設定を取得して重みを決定
+    const settings = getCampaignSettings(campaignId);
+    const voteWeight = votePage === 'basic' ? (settings.basicPageWeight || 1) : (settings.premiumPageWeight || 5);
+    
     // 既存の投票記録を確認・更新
     const sheet = getSheet('votes');
     const values = sheet.getDataRange().getValues();
@@ -46,14 +54,27 @@ function addVote(campaignId, applicantId) {
     let found = false;
     for (let i = 1; i < values.length; i++) {
       if (values[i][1] === campaignId && values[i][2] === applicantId) {
-        // 既存レコードの投票数を+1
+        // 既存レコードの投票数と重み付きスコアを更新
         const currentCount = values[i][3] || 0;
+        const currentWeightedScore = values[i][6] || 0;
+        const currentBasicCount = values[i][7] || 0;
+        const currentPremiumCount = values[i][8] || 0;
+        const currentYoutubeOptInCount = values[i][9] || 0;
+        
         const newCount = currentCount + 1;
+        const newWeightedScore = currentWeightedScore + voteWeight;
+        const newBasicCount = votePage === 'basic' ? currentBasicCount + 1 : currentBasicCount;
+        const newPremiumCount = votePage === 'premium' ? currentPremiumCount + 1 : currentPremiumCount;
+        const newYoutubeOptInCount = (votePage === 'premium' && youtubeOptIn) ? currentYoutubeOptInCount + 1 : currentYoutubeOptInCount;
         
         sheet.getRange(i + 1, 4).setValue(newCount);
         sheet.getRange(i + 1, 5).setValue(getCurrentTimestamp());
+        sheet.getRange(i + 1, 7).setValue(newWeightedScore);
+        sheet.getRange(i + 1, 8).setValue(newBasicCount);
+        sheet.getRange(i + 1, 9).setValue(newPremiumCount);
+        sheet.getRange(i + 1, 10).setValue(newYoutubeOptInCount);
         
-        logInfo(`Updated existing vote record: ${applicantId} -> ${newCount} votes`);
+        logInfo(`Updated existing vote record: ${applicantId} -> ${newCount} votes, weighted score: ${newWeightedScore}`);
         found = true;
         break;
       }
@@ -63,17 +84,25 @@ function addVote(campaignId, applicantId) {
     if (!found) {
       const id = generateId();
       const timestamp = getCurrentTimestamp();
+      const basicCount = votePage === 'basic' ? 1 : 0;
+      const premiumCount = votePage === 'premium' ? 1 : 0;
+      const youtubeOptInCount = (votePage === 'premium' && youtubeOptIn) ? 1 : 0;
       
       const rowData = [
         id, 
         campaignId, 
         applicantId, 
-        1, // 初回投票数
-        timestamp
+        1, // 総投票数
+        timestamp,
+        '', // 予約フィールド
+        voteWeight, // 重み付きスコア
+        basicCount, // 基本ページ投票数
+        premiumCount, // プレミアムページ投票数
+        youtubeOptInCount // YouTube出演希望数
       ];
       
       insertDataToSheet('votes', rowData);
-      logInfo(`Created new vote record: ${applicantId} -> 1 vote`);
+      logInfo(`Created new vote record: ${applicantId} -> 1 vote, weighted score: ${voteWeight}`);
     }
     
     logInfo('Vote added successfully');
@@ -108,6 +137,50 @@ function getVoteCount(campaignId, applicantId) {
   } catch (error) {
     logError('Failed to get vote count', error);
     return 0;
+  }
+}
+
+/**
+ * 投票データ取得（重み付きスコア含む）
+ */
+function getVoteData(campaignId, applicantId) {
+  try {
+    const votes = getDataFromSheet('votes', vote => 
+      vote.campaignid === campaignId && vote.applicantid === applicantId
+    );
+    
+    if (votes.length === 0) {
+      return {
+        voteCount: 0,
+        weightedScore: 0,
+        basicCount: 0,
+        premiumCount: 0,
+        youtubeOptInCount: 0
+      };
+    }
+    
+    // 最新の投票記録を返す
+    const latestVote = votes.sort((a, b) => 
+      new Date(b.updatedat) - new Date(a.updatedat)
+    )[0];
+    
+    return {
+      voteCount: parseInt(latestVote.votecount) || 0,
+      weightedScore: parseInt(latestVote.weightedscore) || 0,
+      basicCount: parseInt(latestVote.basicvotecount) || 0,
+      premiumCount: parseInt(latestVote.premiumvotecount) || 0,
+      youtubeOptInCount: parseInt(latestVote.youtubeoptincount) || 0
+    };
+    
+  } catch (error) {
+    logError('Failed to get vote data', error);
+    return {
+      voteCount: 0,
+      weightedScore: 0,
+      basicCount: 0,
+      premiumCount: 0,
+      youtubeOptInCount: 0
+    };
   }
 }
 
@@ -283,6 +356,62 @@ function exportVoteData(campaignId) {
   } catch (error) {
     logError('Failed to export vote data', error);
     throw new Error('投票データのエクスポートに失敗しました: ' + error.toString());
+  }
+}
+
+/**
+ * 認証付き投票（ユーザー認証あり）
+ */
+function addAuthenticatedVote(financeId, email, name, campaignId, applicantId, votePage = 'basic', youtubeOptIn = false) {
+  try {
+    logInfo(`Authenticated vote attempt: ${financeId} -> ${campaignId}:${applicantId} on ${votePage}, youtubeOptIn=${youtubeOptIn}`);
+    
+    // 1. ユーザー登録・ログイン
+    const user = registerOrLoginUser(financeId, email, name);
+    
+    // 2. 投票可能性チェック（ページごとにチェック）
+    const eligibility = canUserVoteOnPage(financeId, campaignId, applicantId, votePage);
+    if (!eligibility.canVote) {
+      throw new Error(eligibility.reason);
+    }
+    
+    // 3. 通常の投票処理（重み付き）
+    const voteResult = addVote(campaignId, applicantId, votePage, youtubeOptIn);
+    
+    if (voteResult.success) {
+      // 4. ユーザー投票履歴を記録
+      const userVoteId = generateId();
+      const timestamp = getCurrentTimestamp();
+      const settings = getCampaignSettings(campaignId);
+      const voteWeight = votePage === 'basic' ? (settings.basicPageWeight || 1) : (settings.premiumPageWeight || 5);
+      
+      const userVoteData = [
+        userVoteId,
+        financeId,
+        email,
+        campaignId,
+        applicantId,
+        timestamp,
+        votePage,
+        voteWeight,
+        youtubeOptIn ? 'TRUE' : 'FALSE' // YouTube出演選択
+      ];
+      
+      insertDataToSheet('user_votes', userVoteData);
+      
+      logInfo(`User vote recorded: ${userVoteId}`);
+      
+      return {
+        success: true,
+        voteId: userVoteId
+      };
+    }
+    
+    throw new Error('投票処理に失敗しました');
+    
+  } catch (error) {
+    logError('Failed to add authenticated vote', error);
+    throw error;
   }
 }
 

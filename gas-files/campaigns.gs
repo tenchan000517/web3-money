@@ -374,8 +374,13 @@ function getApplicantsFromSheet(sheetUrl, campaignId) {
       }
       applicant.amount = amount;
       
-      // 投票数を取得
-      applicant.voteCount = getVoteCount(campaignId, applicant.id);
+      // 投票数と重み付きスコアを取得
+      const voteData = getVoteData(campaignId, applicant.id);
+      applicant.voteCount = voteData.voteCount;
+      applicant.weightedVoteScore = voteData.weightedScore;
+      applicant.basicVoteCount = voteData.basicCount;
+      applicant.premiumVoteCount = voteData.premiumCount;
+      applicant.youtubeOptInCount = voteData.youtubeOptInCount;
       
       return applicant;
     });
@@ -386,6 +391,64 @@ function getApplicantsFromSheet(sheetUrl, campaignId) {
   } catch (error) {
     logError('Error fetching applicants', error);
     throw new Error('申請者データの取得に失敗しました: ' + error.toString());
+  }
+}
+
+/**
+ * キャンペーン設定取得
+ */
+function getCampaignSettings(campaignId) {
+  try {
+    logInfo(`Getting campaign settings: ${campaignId}`);
+    
+    // デフォルト設定
+    const defaultSettings = {
+      campaignId: campaignId,
+      allowMultipleVotes: false,
+      maxVotesPerUser: 1,
+      enableTwoPageVoting: true,
+      basicPageWeight: 1,
+      premiumPageWeight: 5,
+      createdAt: getCurrentTimestamp()
+    };
+    
+    // campaign_settingsシートから設定を取得
+    try {
+      const settings = getDataFromSheet('campaign_settings', 
+        setting => setting.campaignid === campaignId
+      );
+      
+      if (settings.length > 0) {
+        const setting = settings[0];
+        return {
+          campaignId: campaignId,
+          allowMultipleVotes: setting.allowmultiplevotes === 'true' || setting.allowmultiplevotes === true,
+          maxVotesPerUser: parseInt(setting.maxvotesperuser) || 1,
+          enableTwoPageVoting: setting.enabletwopagevoting !== 'false' && setting.enabletwopagevoting !== false,
+          basicPageWeight: parseInt(setting.basicpageweight) || 1,
+          premiumPageWeight: parseInt(setting.premiumpageweight) || 5,
+          createdAt: setting.createdat
+        };
+      }
+    } catch (error) {
+      logError('Failed to get campaign settings from sheet', error);
+    }
+    
+    // 設定が見つからない場合はデフォルトを返す
+    return defaultSettings;
+    
+  } catch (error) {
+    logError('Failed to get campaign settings', error);
+    // エラーの場合もデフォルト設定を返す
+    return {
+      campaignId: campaignId,
+      allowMultipleVotes: false,
+      maxVotesPerUser: 1,
+      enableTwoPageVoting: true,
+      page1Weight: 2,
+      page2Weight: 1,
+      createdAt: getCurrentTimestamp()
+    };
   }
 }
 

@@ -243,21 +243,27 @@ export const addAuthenticatedVote = async (
     email: string,
     name: string,
     campaignId: string,
-    applicantId: string
+    applicantId: string,
+    votePage: 'basic' | 'premium' = 'basic', // 🆕 投票ページパラメータ（基本 or プレミアム）
+    youtubeOptIn?: boolean // 🆕 YouTube出演選択（プレミアムページのみ）
 ): Promise<AuthenticatedVoteResponse> => {
     console.log('🔄 addAuthenticatedVote called:', {
         financeId,
         email,
         name,
         campaignId,
-        applicantId
+        applicantId,
+        votePage, // 🆕 ログに追加
+        youtubeOptIn // 🆕 YouTube出演選択もログに追加
     });
     const response = await api.post('?path=authenticated-vote', {
         financeId,
         email,
         name,
         campaignId,
-        applicantId
+        applicantId,
+        votePage, // 🆕 リクエストボディに追加
+        youtubeOptIn // 🆕 YouTube出演選択もリクエストに追加
     });
     return handleApiResponse(response);
 };
