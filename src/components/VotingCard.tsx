@@ -185,6 +185,15 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
 
                             {/* 申請内容 */}
                             <div className="space-y-3 mb-4">
+                                {/* SNS情報 */}
+                                {applicant.sns && (
+                                    <div className="rounded-lg p-3 bg-gray-800">
+                                        <p className="text-sm font-medium mb-1 text-gray-300">🐦 SNS</p>
+                                        <p className="text-sm text-gray-400">{applicant.sns}</p>
+                                    </div>
+                                )}
+
+                                {/* 支援理由 */}
                                 <div className="rounded-lg p-3 bg-gray-800">
                                     <p className="text-sm font-medium mb-1 text-gray-300">💡 支援理由</p>
                                     <p className="text-sm leading-relaxed text-gray-400">
@@ -192,14 +201,48 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                     </p>
                                 </div>
 
+                                {/* 希望金額 */}
                                 <div className="flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium text-gray-300">💰 希望金額:</span>
-                                        <span className="text-lg font-semibold text-green-400">
-                                            ¥{getAmount().toLocaleString()}
+                                        <span className="text-lg font-semibold text-green-400 font-mono">
+                                            ¥{applicant.amount || '0'}
                                         </span>
                                     </div>
                                 </div>
+
+                                {/* 詳細用途 */}
+                                {applicant.detailedReason && (
+                                    <div className="rounded-lg p-3 bg-gray-800">
+                                        <p className="text-sm font-medium mb-1 text-gray-300">📝 詳細な使用用途</p>
+                                        <p className="text-sm leading-relaxed text-gray-400">
+                                            {applicant.detailedReason.length > 150 
+                                                ? `${applicant.detailedReason.substring(0, 150)}...` 
+                                                : applicant.detailedReason
+                                            }
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* 応募への想い */}
+                                {applicant.thoughts && (
+                                    <div className="rounded-lg p-3 bg-gray-800">
+                                        <p className="text-sm font-medium mb-1 text-gray-300">💭 応募への想い</p>
+                                        <p className="text-sm leading-relaxed text-gray-400">
+                                            {applicant.thoughts.length > 150 
+                                                ? `${applicant.thoughts.substring(0, 150)}...` 
+                                                : applicant.thoughts
+                                            }
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* 申請日時 */}
+                                {applicant.timestamp && (
+                                    <div className="text-xs text-gray-500 text-right">
+                                        申請日時: {new Date(applicant.timestamp).toLocaleDateString('ja-JP')}
+                                    </div>
+                                )}
                             </div>
 
                             {/* 投票数と投票ボタン */}

@@ -24,10 +24,14 @@ export interface Campaign {
 
 export interface Applicant {
     id: string;
-    campaignId: string;
-    name: string;
-    reason?: string;
-    amount?: number;
+    campaignId?: string;
+    name: string; // Web3ネーム（ニックネーム可）
+    reason?: string; // 支援理由
+    amount?: string; // 正規化済み希望金額（カンマ区切り）
+    sns?: string; // SNSアカウント
+    detailedReason?: string; // 詳細な使用用途
+    thoughts?: string; // 応募への想い
+    timestamp?: string; // 申請日時
     voteCount?: number;
     weightedVoteScore?: number; // 🆕 重み付き投票スコア
     basicVoteCount?: number; // 🆕 基本ページからの投票数

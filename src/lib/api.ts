@@ -324,6 +324,115 @@ export const initializeAuthSheets = async (): Promise<void> => {
     handleApiResponse(response);
 };
 
+/**
+ * 読み取り専用GASから申請者データを直接取得（Googleフォームデータ）
+ * 管理ダッシュボードをバイパスして実際のフォーム申請データを表示
+ */
+export const getApplicantsFromReadonlyGAS = async (): Promise<Applicant[]> => {
+    console.log('🔄 getApplicantsFromReadonlyGAS called - 読み取り専用GAS直接呼び出し');
+    
+    const READONLY_GAS_URL = 'https://script.google.com/macros/s/AKfycbzqF7tHHQ9prKEA8jwwSQI0c90Ui3cUSKsG4_KVBjDpTeWi5K1Ejiux7k7INMgU_oI3/exec';
+    
+    try {
+        console.log('📋 読み取り専用GASに直接接続:', READONLY_GAS_URL);
+        
+        // 読み取り専用GASの applicants エンドポイントを呼び出し
+        const response = await axios.get(`${READONLY_GAS_URL}?path=applicants`, {
+            timeout: 30000,
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        console.log('✅ 読み取り専用GAS レスポンス:', response.data);
+        
+        if (response.data && response.data.success && response.data.data) {
+            const applicantsData = response.data.data.applicants || [];
+            console.log(`✅ Googleフォーム申請者データ取得成功: ${applicantsData.length}名`);
+            console.log('🔍 生データ構造確認:', applicantsData[0]); // 最初のデータ構造をログ出力
+            
+            // データ構造を既存のApplicant型に変換（実際のフィールド名に基づく）
+            const convertedApplicants = applicantsData.map((applicant: any, index: number) => {
+                // 実際のフィールド名を確認してマッピング
+                console.log(`📋 申請者${index + 1}の全フィールド:`, Object.keys(applicant));
+                
+                // 正確なフィールド名マッピング（Web3ネーム対応）
+                const name = applicant['お名前（ニックネーム可）'] || 
+                           applicant['おなまえニックネーム可'] || 
+                           applicant['お名前'] || 
+                           applicant['name'] || 
+                           applicant['名前'] ||
+                           `申請者${index + 1}`;
+                
+                const reason = applicant['支援金使用用途（できるだけ簡潔に記載ください）'] ||
+                             applicant['支援金使用用途できるだけ簡潔に記載ください'] || 
+                             applicant['用途'] || 
+                             applicant['理由'] || 
+                             applicant['reason'] || '';
+                
+                const rawAmount = applicant['出資希望額'] || 
+                                applicant['希望額'] || 
+                                applicant['金額'] || 
+                                applicant['amount'] || '';
+                
+                // 金額の正規化処理
+                const normalizeAmount = (amountStr: string): string => {
+                    if (!amountStr) return '';
+                    
+                    // 文字列から数字のみを抽出
+                    let numStr = amountStr.toString().replace(/[^0-9]/g, '');
+                    
+                    // 万円の処理
+                    if (amountStr.includes('万')) {
+                        const manNum = parseInt(numStr);
+                        if (!isNaN(manNum)) {
+                            numStr = (manNum * 10000).toString();
+                        }
+                    }
+                    
+                    // 数値に変換してカンマ区切りで表示
+                    const num = parseInt(numStr);
+                    return !isNaN(num) ? num.toLocaleString() : rawAmount;
+                };
+                
+                const sns = applicant['SNSアカウントについて'] ||
+                          applicant['snsアカウントについて'] || 
+                          applicant['SNS'] || '';
+                          
+                const detailedReason = applicant['支援金使用用途についてできるだけ詳細にご記載ください（50,000文字以内）'] ||
+                                     applicant['支援金使用用途についてできるだけ詳細にご記載ください50000文字以内'] ||
+                                     applicant['詳細用途'] || '';
+                                     
+                const thoughts = applicant['最後にあなたが今回の応募にかける想いをお好きなだけ記載ください。（50,000文字以内）'] ||
+                               applicant['最後にあなたが今回の応募にかける想いをお好きなだけ記載ください50000文字以内'] ||
+                               applicant['想い'] || '';
+                
+                return {
+                    id: applicant.id || `readonly_${index}`,
+                    name: name,
+                    reason: reason,
+                    amount: normalizeAmount(rawAmount),
+                    sns: sns,
+                    detailedReason: detailedReason,
+                    thoughts: thoughts,
+                    voteCount: 0,
+                    timestamp: applicant['タイムスタンプ'] || applicant['timestamp'] || ''
+                };
+            });
+            
+            console.log('🔄 変換済み申請者データ:', convertedApplicants);
+            return convertedApplicants;
+        }
+        
+        console.log('⚠️ 読み取り専用GASからデータが取得できませんでした');
+        return [];
+        
+    } catch (error) {
+        console.error('❌ 読み取り専用GAS接続エラー:', error);
+        throw new Error(`読み取り専用GASからの申請者データ取得に失敗: ${error.message}`);
+    }
+};
+
 // 🆕 ユーザーセッションキャッシュ管理
 export class UserSessionManager {
     private static readonly CACHE_KEY = 'web3money_user_session';

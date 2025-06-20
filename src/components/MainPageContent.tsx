@@ -1,7 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import NoticeList from '@/components/NoticeList';
 import Image from 'next/image';
+import { Campaign, Applicant } from '@/lib/types';
+import { getApplicantsFromReadonlyGAS } from '@/lib/api';
+import VotingCard from '@/components/VotingCard';
 
 interface MainPageContentProps {
     contractType: 'basic' | 'premium';
@@ -16,6 +19,43 @@ interface MainPageContentProps {
 
 export default function MainPageContent({ contractType, theme }: MainPageContentProps) {
     const [activeTab, setActiveTab] = useState<'notices' | 'voting'>('notices');
+    const [applicants, setApplicants] = useState<Applicant[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (activeTab === 'voting') {
+            fetchApplicants();
+        }
+    }, [activeTab]);
+
+    // シンプルな読み取り専用GASからの直接取得
+    const fetchApplicants = async () => {
+        try {
+            setLoading(true);
+            console.log('📋 テスト用: 読み取り専用GASから申請者データを直接取得');
+            const data = await getApplicantsFromReadonlyGAS();
+            setApplicants(data || []);
+            console.log('✅ 申請者データ取得完了:', data);
+        } catch (err) {
+            setError('申請者の取得に失敗しました');
+            console.error('❌ 申請者データ取得エラー:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVoteSuccess = () => {
+        // 投票後にデータを再取得
+        fetchApplicants();
+    };
+
+    const getSortedApplicants = () => {
+        if (!applicants || applicants.length === 0) return [];
+        return [...applicants].sort((a, b) => {
+            return (b.voteCount || 0) - (a.voteCount || 0);
+        });
+    };
 
     return (
         <div className="min-h-screen" style={{ background: theme.background }}>
@@ -203,20 +243,52 @@ export default function MainPageContent({ contractType, theme }: MainPageContent
                                 </div>
                             </div>
                             
-                            {/* 投票機能実装予定エリア */}
-                            <div className="border rounded-lg p-6 text-center" style={{ 
-                                backgroundColor: `${theme.primary}10`, 
-                                borderColor: `${theme.primary}30` 
-                            }}>
-                                <div className="text-3xl mb-4" style={{ color: theme.primary }}>🚧</div>
-                                <h3 className="text-lg font-semibold mb-2" style={{ color: theme.text }}>
-                                    {contractType === 'basic' ? '基本投票機能' : 'プレミアム投票機能'}
-                                </h3>
-                                <p className="text-sm" style={{ color: `${theme.text}80` }}>
-                                    新しい投票システムを実装中です。<br/>
-                                    {contractType === 'premium' && 'YouTube出演選択機能も含まれます。'}
+                            {/* テスト用説明 */}
+                            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p className="text-sm text-blue-800">
+                                    📋 <strong>テスト表示:</strong> 読み取り専用GASから申請者データを直接取得して表示中
                                 </p>
                             </div>
+
+                            {/* 申請者一覧 */}
+                            {error ? (
+                                <div className="text-center py-12">
+                                    <div className="text-red-500 text-xl mb-4">エラーが発生しました</div>
+                                    <p className="text-gray-600">{error}</p>
+                                    <button
+                                        onClick={() => {
+                                            setError(null);
+                                            fetchApplicants();
+                                        }}
+                                        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    >
+                                        再読み込み
+                                    </button>
+                                </div>
+                            ) : loading ? (
+                                <div className="text-center py-12">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                                    <p className="text-gray-600">申請者を読み込み中...</p>
+                                </div>
+                            ) : applicants.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <p className="text-gray-600">申請者がいません</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {getSortedApplicants().map((applicant, index) => (
+                                        <VotingCard
+                                            key={applicant.id}
+                                            applicant={applicant}
+                                            campaignId="test-readonly-campaign"
+                                            rank={index + 1}
+                                            onVoteSuccess={handleVoteSuccess}
+                                            votePage={contractType}
+                                            showWeightedScore={false}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
