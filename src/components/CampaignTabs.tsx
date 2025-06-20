@@ -5,6 +5,7 @@ import { getCampaigns, getCampaign } from '@/lib/api';
 import VotingCard from './VotingCard';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
+import { Lightbulb, Clock, Vote } from 'lucide-react';
 
 export default function CampaignTabs() {
     const [activeCampaigns, setActiveCampaigns] = useState<Campaign[]>([]);
@@ -176,7 +177,17 @@ export default function CampaignTabs() {
                                         ? 'bg-red-100 text-red-700'
                                         : 'bg-green-100 text-green-700'
                                         }`}>
-                                        {isNearExpiry(campaignData.endDate) ? '⏰ まもなく終了' : '🗳️ 投票中'}
+                                        {isNearExpiry(campaignData.endDate) ? (
+                                            <span className="flex items-center gap-1">
+                                                <Clock className="w-3 h-3" />
+                                                まもなく終了
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-1">
+                                                <Vote className="w-3 h-3" />
+                                                投票中
+                                            </span>
+                                        )}
                                     </span>
                                 </div>
                             </div>
@@ -195,7 +206,7 @@ export default function CampaignTabs() {
 
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                             <div className="flex items-start gap-3">
-                                <div className="text-blue-600 text-xl">💡</div>
+                                <Lightbulb className="text-blue-600 w-5 h-5 mt-0.5" />
                                 <div className="text-blue-800 text-sm">
                                     <p className="font-medium mb-1">投票について</p>
                                     <ul className="space-y-1 text-xs">

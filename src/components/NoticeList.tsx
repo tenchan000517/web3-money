@@ -4,6 +4,7 @@ import { Notice } from '@/lib/types';
 import { getNotices } from '@/lib/api';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
+import { Megaphone } from 'lucide-react';
 
 export default function NoticeList() {
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -88,7 +89,8 @@ export default function NoticeList() {
                 </h3>
                 <div className="flex-shrink-0 ml-4">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    📢 お知らせ
+                    <Megaphone className="w-3 h-3 mr-1" />
+                    お知らせ
                   </span>
                 </div>
               </div>

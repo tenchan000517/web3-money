@@ -44,7 +44,10 @@ Next: **サイト表示テスト** → 投票機能テスト → システム統
 
 【デプロイ済みGAS】
 ✅ 読み取り専用GAS: https://script.google.com/macros/s/AKfycbzqF7tHHQ9prKEA8jwwSQI0c90Ui3cUSKsG4_KVBjDpTeWi5K1Ejiux7k7INMgU_oI3/exec
-❗ プライベート投票GAS: 未デプロイ
+❗ プライベート投票GAS: デプロイ済
+✅ NEXT_PUBLIC_GAS_API_URL=https://script.google.com/macros/s/AKfycbxlvP4m_u9njP07uizQ42BiurLLFpLrKt0QXmJxOMPG2I4M8QqfclsUSwNecD3t_9WXBg/exec
+
+
 
 【次の開発フェーズ】
 1. **フロントエンドサイト表示テスト**（ほぼ完了）

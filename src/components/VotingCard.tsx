@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Applicant } from '@/lib/types';
 import { addAuthenticatedVote, UserSessionManager } from '@/lib/api';
+import { Heart, Medal, Trophy, Award, Star, DollarSign, Lightbulb, FileText, MessageCircle, Hash, X, RotateCw, Video } from 'lucide-react';
 
 interface VotingCardProps {
     applicant: Applicant;
@@ -9,10 +10,10 @@ interface VotingCardProps {
     rank: number;
     onVoteSuccess: () => void;
     votePage?: 'basic' | 'premium'; // 🆕 投票ページ（基本 or プレミアム）
-    showWeightedScore?: boolean; // 🆕 重み付きスコアを表示するか
+    // showWeightedScore?: boolean; // 🆕 重み付きスコアを表示するか（未使用）
 }
 
-export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess, votePage = 'basic', showWeightedScore = false }: VotingCardProps) {
+export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess, votePage = 'basic' }: VotingCardProps) {
     const [showVoteModal, setShowVoteModal] = useState(false);
     const [voting, setVoting] = useState(false);
     const [youtubeOptIn, setYoutubeOptIn] = useState(false); // 🆕 YouTube出演選択
@@ -147,12 +148,12 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
         return typeof amount === 'string' ? parseInt(amount.replace(/[^\d]/g, ''), 10) || 0 : amount;
     };
 
-    const getRankEmoji = (rank: number) => {
+    const getRankIcon = (rank: number) => {
         switch (rank) {
-            case 1: return '🥇';
-            case 2: return '🥈';
-            case 3: return '🥉';
-            default: return rank <= 10 ? '🏅' : '';
+            case 1: return <Trophy className="w-6 h-6 text-yellow-400" />;
+            case 2: return <Medal className="w-6 h-6 text-gray-400" />;
+            case 3: return <Award className="w-6 h-6 text-orange-400" />;
+            default: return rank <= 10 ? <Star className="w-6 h-6 text-blue-400" /> : null;
         }
     };
 
@@ -172,9 +173,7 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                         <div className="flex-1">
                             {/* ランクとタイトル */}
                             <div className="flex items-center gap-3 mb-3">
-                                {rank <= 10 && (
-                                    <span className="text-2xl">{getRankEmoji(rank)}</span>
-                                )}
+                                {rank <= 10 && getRankIcon(rank)}
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm font-medium text-gray-400">#{rank}</span>
                                     <h3 className="text-lg font-semibold text-white">
@@ -188,14 +187,20 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                 {/* SNS情報 */}
                                 {applicant.sns && (
                                     <div className="rounded-lg p-3 bg-gray-800">
-                                        <p className="text-sm font-medium mb-1 text-gray-300">🐦 SNS</p>
+                                        <p className="text-sm font-medium mb-1 text-gray-300 flex items-center gap-2">
+                                            <Hash className="w-4 h-4" />
+                                            SNS
+                                        </p>
                                         <p className="text-sm text-gray-400">{applicant.sns}</p>
                                     </div>
                                 )}
 
                                 {/* 支援理由 */}
                                 <div className="rounded-lg p-3 bg-gray-800">
-                                    <p className="text-sm font-medium mb-1 text-gray-300">💡 支援理由</p>
+                                    <p className="text-sm font-medium mb-1 text-gray-300 flex items-center gap-2">
+                                        <Lightbulb className="w-4 h-4" />
+                                        支援理由
+                                    </p>
                                     <p className="text-sm leading-relaxed text-gray-400">
                                         {getReason()}
                                     </p>
@@ -204,7 +209,8 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                 {/* 希望金額 */}
                                 <div className="flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-2">
-                                        <span className="font-medium text-gray-300">💰 希望金額:</span>
+                                        <DollarSign className="w-4 h-4 text-gray-300" />
+                                        <span className="font-medium text-gray-300">希望金額:</span>
                                         <span className="text-lg font-semibold text-green-400 font-mono">
                                             ¥{applicant.amount || '0'}
                                         </span>
@@ -214,7 +220,10 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                 {/* 詳細用途 */}
                                 {applicant.detailedReason && (
                                     <div className="rounded-lg p-3 bg-gray-800">
-                                        <p className="text-sm font-medium mb-1 text-gray-300">📝 詳細な使用用途</p>
+                                        <p className="text-sm font-medium mb-1 text-gray-300 flex items-center gap-2">
+                                            <FileText className="w-4 h-4" />
+                                            詳細な使用用途
+                                        </p>
                                         <p className="text-sm leading-relaxed text-gray-400">
                                             {applicant.detailedReason.length > 150 
                                                 ? `${applicant.detailedReason.substring(0, 150)}...` 
@@ -227,7 +236,10 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                 {/* 応募への想い */}
                                 {applicant.thoughts && (
                                     <div className="rounded-lg p-3 bg-gray-800">
-                                        <p className="text-sm font-medium mb-1 text-gray-300">💭 応募への想い</p>
+                                        <p className="text-sm font-medium mb-1 text-gray-300 flex items-center gap-2">
+                                            <MessageCircle className="w-4 h-4" />
+                                            応募への想い
+                                        </p>
                                         <p className="text-sm leading-relaxed text-gray-400">
                                             {applicant.thoughts.length > 150 
                                                 ? `${applicant.thoughts.substring(0, 150)}...` 
@@ -249,7 +261,7 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                             <div className="flex items-center justify-between pt-3 border-t border-gray-700">
                                 <div className="flex items-center gap-3">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-2xl">💖</span>
+                                        <Heart className="w-6 h-6 text-pink-400" />
                                         <div className="text-center">
                                             <div className="text-xl font-bold text-pink-400">
                                                 {applicant.voteCount || 0}
@@ -259,8 +271,10 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                     </div>
 
                                     {rank <= 3 && (
-                                        <div className="text-xs text-gray-400">
-                                            {rank === 1 ? '🎉 1位!' : rank === 2 ? '✨ 2位' : '🌟 3位'}
+                                        <div className="text-xs text-gray-400 flex items-center gap-1">
+                                            {rank === 1 ? <><Trophy className="w-3 h-3" /> 1位!</> : 
+                                             rank === 2 ? <><Star className="w-3 h-3" /> 2位</> : 
+                                             <><Award className="w-3 h-3" /> 3位</>}
                                         </div>
                                     )}
                                 </div>
@@ -292,7 +306,7 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                         <div className="p-6">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                                    <span className="text-2xl">💖</span>
+                                    <Heart className="w-6 h-6 text-pink-500" />
                                     この申請者を応援しますか？
                                 </h3>
                                 <button
@@ -300,9 +314,7 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                     className="text-gray-500 hover:text-gray-700 p-2"
                                     disabled={voting}
                                 >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
+                                    <X className="w-6 h-6" />
                                 </button>
                             </div>
 
@@ -377,8 +389,9 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                             className="w-5 h-5 text-yellow-600 bg-white border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
                                         />
                                         <div className="flex-1">
-                                            <span className="text-sm font-medium text-gray-900">
-                                                🎥 YouTube出演を希望する
+                                            <span className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                                                <Video className="w-4 h-4" />
+                                                YouTube出演を希望する
                                             </span>
                                             <p className="text-xs text-gray-600 mt-1">
                                                 支援を受けた場合、YouTube動画への出演を希望します
@@ -397,14 +410,12 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                 >
                                     {voting ? (
                                         <>
-                                            <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                            </svg>
+                                            <RotateCw className="w-5 h-5 animate-spin" />
                                             応援中...
                                         </>
                                     ) : (
                                         <>
-                                            <span className="text-lg">💖</span>
+                                            <Heart className="w-5 h-5" />
                                             応援する
                                         </>
                                     )}

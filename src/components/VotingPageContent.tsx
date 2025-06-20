@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import { Campaign, Applicant } from '@/lib/types';
 import { getCampaigns, getCampaign } from '@/lib/api';
 import VotingCard from '@/components/VotingCard';
@@ -11,13 +11,13 @@ interface VotingPageContentProps {
 }
 
 export default function VotingPageContent({ votePage }: VotingPageContentProps) {
-  const router = useRouter();
+  // const router = useRouter();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<'weighted' | 'count'>('weighted');
+  // const [sortBy, setSortBy] = useState<'weighted' | 'count'>('weighted');
 
   useEffect(() => {
     fetchCampaigns();
@@ -171,7 +171,6 @@ export default function VotingPageContent({ votePage }: VotingPageContentProps) 
                 rank={index + 1}
                 onVoteSuccess={handleVoteSuccess}
                 votePage={votePage}
-                showWeightedScore={false}
               />
             ))}
           </div>

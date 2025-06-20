@@ -352,7 +352,7 @@ export const getApplicantsFromReadonlyGAS = async (): Promise<Applicant[]> => {
             console.log('🔍 生データ構造確認:', applicantsData[0]); // 最初のデータ構造をログ出力
             
             // データ構造を既存のApplicant型に変換（実際のフィールド名に基づく）
-            const convertedApplicants = applicantsData.map((applicant: any, index: number) => {
+            const convertedApplicants = applicantsData.map((applicant: Record<string, unknown>, index: number) => {
                 // 実際のフィールド名を確認してマッピング
                 console.log(`📋 申請者${index + 1}の全フィールド:`, Object.keys(applicant));
                 
@@ -489,13 +489,13 @@ export const getApplicantsFromReadonlyGAS = async (): Promise<Applicant[]> => {
         
     } catch (error) {
         console.error('❌ 読み取り専用GAS接続エラー:', error);
-        throw new Error(`読み取り専用GASからの申請者データ取得に失敗: ${error.message}`);
+        throw new Error(`読み取り専用GASからの申請者データ取得に失敗: ${(error as Error).message}`);
     }
 };
 
 // 🆕 ユーザーセッションキャッシュ管理
 export class UserSessionManager {
-    private static readonly CACHE_KEY = 'web3money_user_session';
+    // private static readonly CACHE_KEY = 'web3money_user_session';
     private static readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24時間
 
     /**
