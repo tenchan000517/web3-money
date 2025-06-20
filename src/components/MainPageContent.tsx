@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Applicant } from '@/lib/types';
 import { getApplicantsFromReadonlyGAS } from '@/lib/api';
 import VotingCard from '@/components/VotingCard';
-import { Megaphone, Heart, Lock, Shield, Wifi, RefreshCw, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Megaphone, Heart, Lock, Shield, Wifi, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface MainPageContentProps {
     contractType: 'basic' | 'premium';
@@ -131,10 +131,10 @@ export default function MainPageContent({ contractType, theme }: MainPageContent
                             style={activeTab === 'notices' ? { borderBottomColor: theme.primary } : {}}
                         >
                             <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-2'}`}>
-                                <svg className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                                 </svg>
-お知らせ
+                                お知らせ
                             </div>
                         </button>
 
@@ -148,10 +148,10 @@ export default function MainPageContent({ contractType, theme }: MainPageContent
                             style={activeTab === 'voting' ? { borderBottomColor: theme.accent } : {}}
                         >
                             <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-2'}`}>
-                                <svg className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
-支援投票
+                                支援投票
                             </div>
                         </button>
                     </div>
@@ -159,7 +159,7 @@ export default function MainPageContent({ contractType, theme }: MainPageContent
             </div>
 
             {/* メインコンテンツ */}
-            <div className="container mx-auto px-4 py-6">
+            <div className="container mx-auto px-4 py-8">
                 {/* タブ説明 */}
                 <div className="mb-6">
                     {activeTab === 'notices' && (
@@ -304,7 +304,6 @@ export default function MainPageContent({ contractType, theme }: MainPageContent
                                             rank={index + 1}
                                             onVoteSuccess={handleVoteSuccess}
                                             votePage={contractType}
-                                            showWeightedScore={false}
                                         />
                                     ))}
                                 </div>

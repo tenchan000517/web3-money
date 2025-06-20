@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Applicant } from '@/lib/types';
 import { addAuthenticatedVote, UserSessionManager } from '@/lib/api';
-import { Heart, Medal, Trophy, Award, Star, DollarSign, Lightbulb, FileText, MessageCircle, X, RotateCw, Video, ChevronDown, ChevronUp } from 'lucide-react';
+import { Heart, Medal, Trophy, Award, Star, Lightbulb, FileText, MessageCircle, X, RotateCw, Video, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface VotingCardProps {
     applicant: Applicant;
@@ -210,7 +210,7 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                 {/* 希望金額 */}
                                 <div className="flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-2">
-                                        <DollarSign className="w-4 h-4 text-gray-300" />
+                                        <span className="text-gray-300 text-sm font-bold">¥</span>
                                         <span className="font-medium text-gray-300">希望金額:</span>
                                         <span className="text-lg font-semibold text-green-400 font-mono">
                                             ¥{applicant.amount || '0'}
@@ -307,19 +307,19 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                 <div className="flex items-center gap-3">
                                     <div className="flex items-center gap-2">
                                         <Heart className="w-6 h-6 text-pink-400" />
-                                        <div className="text-center">
-                                            <div className="text-xl font-bold text-pink-400">
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-xl font-bold text-pink-400">
                                                 {applicant.voteCount || 0}
-                                            </div>
-                                            <div className="text-xs text-gray-400">票</div>
+                                            </span>
+                                            <span className="text-sm text-gray-400">票</span>
                                         </div>
                                     </div>
 
                                     {rank <= 3 && (
-                                        <div className="text-xs text-gray-400 flex items-center gap-1">
-                                            {rank === 1 ? <><Trophy className="w-3 h-3" /> 1位!</> : 
-                                             rank === 2 ? <><Star className="w-3 h-3" /> 2位</> : 
-                                             <><Award className="w-3 h-3" /> 3位</>}
+                                        <div className="text-sm text-gray-400 flex items-center gap-1">
+                                            {rank === 1 ? <><Trophy className="w-6 h-6" /> RANK1!</> : 
+                                             rank === 2 ? <><Star className="w-6 h-6" /> RANK2</> : 
+                                             <><Award className="w-6 h-6" /> RANK3</>}
                                         </div>
                                     )}
                                 </div>
@@ -328,7 +328,7 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                     <button
                                         onClick={handleVoteClick}
                                         disabled={voting}
-                                        className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${voting
+                                        className={`${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2 text-sm'} rounded-lg font-medium transition-all duration-200 ${voting
                                                 ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                                                 : votePage === 'basic'
                                                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 shadow-md'

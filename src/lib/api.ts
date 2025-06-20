@@ -374,7 +374,7 @@ export const getApplicantsFromReadonlyGAS = async (): Promise<Applicant[]> => {
                 // 完全一致を試行
                 for (const pattern of namePatterns) {
                     if (applicant[pattern]) {
-                        name = applicant[pattern];
+                        name = String(applicant[pattern] || '');
                         console.log(`✅ 名前フィールド発見 (${pattern}):`, name);
                         break;
                     }
@@ -384,7 +384,7 @@ export const getApplicantsFromReadonlyGAS = async (): Promise<Applicant[]> => {
                 if (!name) {
                     for (const key of allKeys) {
                         if (key.includes('名前') || key.includes('ニックネーム') || key.toLowerCase().includes('name')) {
-                            name = applicant[key];
+                            name = String(applicant[key] || '');
                             console.log(`⚠️ 名前フィールド部分一致発見 (${key}):`, name);
                             break;
                         }
@@ -471,7 +471,7 @@ export const getApplicantsFromReadonlyGAS = async (): Promise<Applicant[]> => {
                     id: applicant.id || `readonly_${index}`,
                     name: name,
                     reason: reason,
-                    amount: normalizeAmount(rawAmount),
+                    amount: normalizeAmount(String(rawAmount || '0')),
                     sns: sns,
                     detailedReason: detailedReason,
                     thoughts: thoughts,
