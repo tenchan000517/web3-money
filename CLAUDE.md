@@ -18,7 +18,7 @@ WEB3 MONEY is a Next.js application providing restricted services for "レリモ
 
 ### Development
 ```bash
-npm run dev          # Start development server at localhost:3000
+npm run dev -- --port 3001  # Start development server at localhost:3001 (ALWAYS use 3001, NOT 3000)
 npm run build        # Build for production
 npm run start        # Start production server
 npm run lint         # Run ESLint

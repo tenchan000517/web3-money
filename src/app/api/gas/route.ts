@@ -185,6 +185,50 @@ export async function POST(request: NextRequest) {
         });
     }
 
+    // 読み取り専用スプレッドシートデータ受信テスト
+    if (path === 'test-readonly-reception') {
+        console.log('Testing readonly spreadsheet data reception');
+        
+        try {
+            // 読み取り専用GASに直接接続してデータ受信テスト
+            const readOnlyGasUrl = 'https://script.google.com/macros/s/AKfycbwBmbNvgqLrRak9tegXYWZhJJQMBEccktipQ_dmET0JB7JhPoNBn5PqwOJ2-ez6N8TM/exec';
+            
+            const response = await fetch(`${readOnlyGasUrl}?path=applicants`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Readonly GAS response: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Readonly GAS response:', data);
+
+            return NextResponse.json({
+                success: true,
+                data: {
+                    status: 'data-reception-test',
+                    message: '読み取り専用スプレッドシートからデータ受信テスト',
+                    timestamp: new Date().toISOString(),
+                    readOnlyResponse: data,
+                    receptionStatus: data.success ? 'success' : 'failed'
+                }
+            });
+
+        } catch (error) {
+            console.error('Readonly reception test error:', error);
+            return NextResponse.json({
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error',
+                message: '読み取り専用スプレッドシートへの接続に失敗しました',
+                timestamp: new Date().toISOString()
+            });
+        }
+    }
+
     return handleGASRequest(request, 'POST');
 }
 

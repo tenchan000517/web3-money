@@ -174,8 +174,14 @@ function getApplicantsData(campaignId) {
         applicant[key] = row[index] || '';
       });
       
-      // 必須フィールドが存在する場合のみ追加
-      if (applicant.name || applicant.お名前 || applicant.申請者名) {
+      // 必須フィールドが存在する場合のみ追加（実際のフィールド名に基づく検出）
+      const hasNameField = applicant.おなまえニックネーム可 || applicant.name || applicant.お名前 || applicant.申請者名;
+      const hasEmailField = applicant.ごれんらくようメールアドレス || applicant.email || applicant.メール;
+      const hasAnyValidData = Object.values(applicant).some(value => 
+        value && value.toString().trim() !== '' && value.toString().trim() !== 'undefined'
+      );
+      
+      if (hasNameField || hasEmailField || hasAnyValidData) {
         applicant.id = generateApplicantId(i);
         applicant.rowIndex = i;
         applicants.push(applicant);
