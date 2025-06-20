@@ -35,6 +35,7 @@ export default function RelayBasicPage() {
       'xmobile.ne.jp/mypage/',
       'localhost', // 開発用
       '127.0.0.1', // 開発用
+      'tenchan000517.github.io', // テスト用GitHub Pages
     ];
 
     const referrer = document.referrer;
