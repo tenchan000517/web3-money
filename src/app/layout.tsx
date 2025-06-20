@@ -27,14 +27,14 @@ export default function RootLayout({
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         
-        {/* セキュリティヘッダー */}
+        {/* セキュリティヘッダー（X-Frame-Options以外） */}
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
-        <meta httpEquiv="X-Frame-Options" content="DENY" />
         <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
         <meta httpEquiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
         
         {/* PWA対応 */}
         <meta name="theme-color" content="#3b82f6" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="WEB3 MONEY" />
@@ -59,12 +59,19 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // エラーハンドリング
+              // エラーハンドリング（拡張機能エラーを除外）
               window.addEventListener('error', function(e) {
+                if (e.message && e.message.includes('storage is not allowed')) {
+                  return; // ブラウザ拡張機能のエラーを無視
+                }
                 console.error('Global error:', e.error);
               });
               
               window.addEventListener('unhandledrejection', function(e) {
+                if (e.reason && e.reason.message && e.reason.message.includes('storage is not allowed')) {
+                  e.preventDefault(); // ブラウザ拡張機能のエラーを無視
+                  return;
+                }
                 console.error('Unhandled promise rejection:', e.reason);
               });
               
@@ -74,8 +81,10 @@ export default function RootLayout({
               }
               
               // セキュリティ警告（開発者ツール対策）
-              console.log('%c🚨 セキュリティ警告', 'color: red; font-size: 20px; font-weight: bold;');
-              console.log('%cこのコンソールは開発者向けです。不正なコードの実行はシステムに害を与える可能性があります。', 'color: red; font-size: 14px;');
+              if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
+                console.log('%c🚨 セキュリティ警告', 'color: red; font-size: 20px; font-weight: bold;');
+                console.log('%cこのコンソールは開発者向けです。不正なコードの実行はシステムに害を与える可能性があります。', 'color: red; font-size: 14px;');
+              }
             `,
           }}
         />

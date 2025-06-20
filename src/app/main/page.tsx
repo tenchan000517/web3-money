@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import NoticeList from '@/components/NoticeList';
-import CampaignTabs from '@/components/CampaignTabs';
+// import CampaignTabs from '@/components/CampaignTabs'; // 新しい投票ページへのリンクで代替
 import VotingPageSelector from '@/components/VotingPageSelector';
 import Image from 'next/image';
 

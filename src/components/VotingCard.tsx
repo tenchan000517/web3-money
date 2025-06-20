@@ -157,19 +157,11 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
     };
 
     const getRankColor = (rank: number) => {
-        if (votePage === 'premium') {
-            // プレミアムページ用のダークテーマ
-            if (rank === 1) return 'border-l-4 border-yellow-400 bg-gradient-to-r from-gray-900 to-gray-800 text-white';
-            if (rank === 2) return 'border-l-4 border-gray-400 bg-gradient-to-r from-gray-900 to-gray-800 text-white';
-            if (rank === 3) return 'border-l-4 border-orange-400 bg-gradient-to-r from-gray-900 to-gray-800 text-white';
-            return 'border-l-4 border-gray-600 bg-gray-900 text-white';
-        } else {
-            // 基本ページ用のライトテーマ
-            if (rank === 1) return 'border-l-4 border-yellow-400 bg-gradient-to-r from-yellow-50 to-white';
-            if (rank === 2) return 'border-l-4 border-gray-400 bg-gradient-to-r from-gray-50 to-white';
-            if (rank === 3) return 'border-l-4 border-orange-400 bg-gradient-to-r from-orange-50 to-white';
-            return 'border-l-4 border-blue-200 bg-white';
-        }
+        // 両方のページをダークテーマに統一
+        if (rank === 1) return 'border-l-4 border-yellow-400 bg-gradient-to-r from-gray-900 to-gray-800 text-white';
+        if (rank === 2) return 'border-l-4 border-gray-400 bg-gradient-to-r from-gray-900 to-gray-800 text-white';
+        if (rank === 3) return 'border-l-4 border-orange-400 bg-gradient-to-r from-gray-900 to-gray-800 text-white';
+        return 'border-l-4 border-gray-600 bg-gray-900 text-white';
     };
 
     return (
@@ -184,8 +176,8 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                     <span className="text-2xl">{getRankEmoji(rank)}</span>
                                 )}
                                 <div className="flex items-center gap-2">
-                                    <span className={`text-sm font-medium ${votePage === 'premium' ? 'text-gray-400' : 'text-gray-500'}`}>#{rank}</span>
-                                    <h3 className={`text-lg font-semibold ${votePage === 'premium' ? 'text-white' : 'text-gray-800'}`}>
+                                    <span className="text-sm font-medium text-gray-400">#{rank}</span>
+                                    <h3 className="text-lg font-semibold text-white">
                                         {getName()}
                                     </h3>
                                 </div>
@@ -193,17 +185,17 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
 
                             {/* 申請内容 */}
                             <div className="space-y-3 mb-4">
-                                <div className={`rounded-lg p-3 ${votePage === 'premium' ? 'bg-gray-800' : 'bg-gray-50'}`}>
-                                    <p className={`text-sm font-medium mb-1 ${votePage === 'premium' ? 'text-gray-300' : 'text-gray-700'}`}>💡 支援理由</p>
-                                    <p className={`text-sm leading-relaxed ${votePage === 'premium' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                <div className="rounded-lg p-3 bg-gray-800">
+                                    <p className="text-sm font-medium mb-1 text-gray-300">💡 支援理由</p>
+                                    <p className="text-sm leading-relaxed text-gray-400">
                                         {getReason()}
                                     </p>
                                 </div>
 
                                 <div className="flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-2">
-                                        <span className={`font-medium ${votePage === 'premium' ? 'text-gray-300' : 'text-gray-700'}`}>💰 希望金額:</span>
-                                        <span className={`text-lg font-semibold ${votePage === 'premium' ? 'text-green-400' : 'text-green-600'}`}>
+                                        <span className="font-medium text-gray-300">💰 希望金額:</span>
+                                        <span className="text-lg font-semibold text-green-400">
                                             ¥{getAmount().toLocaleString()}
                                         </span>
                                     </div>
@@ -211,49 +203,20 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                             </div>
 
                             {/* 投票数と投票ボタン */}
-                            <div className={`flex items-center justify-between pt-3 border-t ${votePage === 'premium' ? 'border-gray-700' : 'border-gray-100'}`}>
+                            <div className="flex items-center justify-between pt-3 border-t border-gray-700">
                                 <div className="flex items-center gap-3">
                                     <div className="flex items-center gap-2">
                                         <span className="text-2xl">💖</span>
                                         <div className="text-center">
-                                            <div className="text-xl font-bold text-pink-600">
+                                            <div className="text-xl font-bold text-pink-400">
                                                 {applicant.voteCount || 0}
                                             </div>
-                                            <div className="text-xs text-gray-500">票</div>
+                                            <div className="text-xs text-gray-400">票</div>
                                         </div>
                                     </div>
 
-                                    {/* 🆕 重み付きスコア表示 */}
-                                    {showWeightedScore && (
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xl">⚖️</span>
-                                            <div className="text-center">
-                                                <div className="text-lg font-bold text-purple-600">
-                                                    {applicant.weightedVoteScore || 0}
-                                                </div>
-                                                <div className="text-xs text-gray-500">スコア</div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* 🆕 ページ別投票数表示 */}
-                                    {showWeightedScore && (applicant.basicVoteCount || applicant.premiumVoteCount) ? (
-                                        <div className="flex gap-2 text-xs">
-                                            {applicant.basicVoteCount > 0 && (
-                                                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                                                    基本×{applicant.basicVoteCount}
-                                                </span>
-                                            )}
-                                            {applicant.premiumVoteCount > 0 && (
-                                                <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
-                                                    プレミアム×{applicant.premiumVoteCount}
-                                                </span>
-                                            )}
-                                        </div>
-                                    ) : null}
-
                                     {rank <= 3 && (
-                                        <div className="text-xs text-gray-500">
+                                        <div className="text-xs text-gray-400">
                                             {rank === 1 ? '🎉 1位!' : rank === 2 ? '✨ 2位' : '🌟 3位'}
                                         </div>
                                     )}
@@ -264,13 +227,13 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                         onClick={handleVoteClick}
                                         disabled={voting}
                                         className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${voting
-                                                ? 'bg-gray-300 text-white cursor-not-allowed'
+                                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                                                 : votePage === 'basic'
                                                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 shadow-md'
                                                 : 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white hover:from-yellow-600 hover:to-yellow-700 transform hover:scale-105 shadow-md'
                                             }`}
                                     >
-                                        {voting ? '投票中...' : votePage === 'basic' ? '投票する (+1)' : '⭐ プレミアム投票 (+5)'}
+                                        {voting ? '投票中...' : '投票する'}
                                     </button>
                                 </div>
                             </div>
