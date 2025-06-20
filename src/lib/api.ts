@@ -357,12 +357,45 @@ export const getApplicantsFromReadonlyGAS = async (): Promise<Applicant[]> => {
                 console.log(`📋 申請者${index + 1}の全フィールド:`, Object.keys(applicant));
                 
                 // 正確なフィールド名マッピング（Web3ネーム対応）
-                const name = applicant['お名前（ニックネーム可）'] || 
-                           applicant['おなまえニックネーム可'] || 
-                           applicant['お名前'] || 
-                           applicant['name'] || 
-                           applicant['名前'] ||
-                           `申請者${index + 1}`;
+                // 全てのフィールドキーを確認
+                const allKeys = Object.keys(applicant);
+                console.log(`👤 申請者${index + 1}の全キー:`, allKeys);
+                
+                // 名前フィールドを様々なパターンで検索
+                let name = '';
+                const namePatterns = [
+                    'お名前（ニックネーム可）',
+                    'おなまえニックネーム可',
+                    'お名前',
+                    'name',
+                    '名前'
+                ];
+                
+                // 完全一致を試行
+                for (const pattern of namePatterns) {
+                    if (applicant[pattern]) {
+                        name = applicant[pattern];
+                        console.log(`✅ 名前フィールド発見 (${pattern}):`, name);
+                        break;
+                    }
+                }
+                
+                // 完全一致が見つからない場合、部分一致を試行
+                if (!name) {
+                    for (const key of allKeys) {
+                        if (key.includes('名前') || key.includes('ニックネーム') || key.toLowerCase().includes('name')) {
+                            name = applicant[key];
+                            console.log(`⚠️ 名前フィールド部分一致発見 (${key}):`, name);
+                            break;
+                        }
+                    }
+                }
+                
+                // それでも見つからない場合はデフォルト
+                if (!name) {
+                    name = `申請者${index + 1}`;
+                    console.log(`❌ 名前フィールドが見つからないためデフォルト使用:`, name);
+                }
                 
                 const reason = applicant['支援金使用用途（できるだけ簡潔に記載ください）'] ||
                              applicant['支援金使用用途できるだけ簡潔に記載ください'] || 
@@ -379,20 +412,33 @@ export const getApplicantsFromReadonlyGAS = async (): Promise<Applicant[]> => {
                 const normalizeAmount = (amountStr: string): string => {
                     if (!amountStr) return '';
                     
-                    // 文字列から数字のみを抽出
-                    let numStr = amountStr.toString().replace(/[^0-9]/g, '');
+                    console.log('💰 金額正規化前:', amountStr);
+                    
+                    const str = amountStr.toString().toLowerCase();
+                    let finalAmount = 0;
                     
                     // 万円の処理
-                    if (amountStr.includes('万')) {
+                    if (str.includes('万')) {
+                        // 「１０万円」「250万円」等
+                        const beforeMan = str.split('万')[0];
+                        const numStr = beforeMan.replace(/[^0-9]/g, '');
                         const manNum = parseInt(numStr);
                         if (!isNaN(manNum)) {
-                            numStr = (manNum * 10000).toString();
+                            finalAmount = manNum * 10000;
+                        }
+                    } 
+                    // 通常の数値（「50,000円」等）
+                    else {
+                        const numStr = str.replace(/[^0-9]/g, '');
+                        const num = parseInt(numStr);
+                        if (!isNaN(num)) {
+                            finalAmount = num;
                         }
                     }
                     
-                    // 数値に変換してカンマ区切りで表示
-                    const num = parseInt(numStr);
-                    return !isNaN(num) ? num.toLocaleString() : rawAmount;
+                    const result = finalAmount > 0 ? finalAmount.toLocaleString() : amountStr;
+                    console.log('💰 金額正規化後:', result);
+                    return result;
                 };
                 
                 const sns = applicant['SNSアカウントについて'] ||
