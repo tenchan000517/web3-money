@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Applicant } from '@/lib/types';
 import { addAuthenticatedVote, UserSessionManager } from '@/lib/api';
-import { Heart, Medal, Trophy, Award, Star, DollarSign, Lightbulb, FileText, MessageCircle, Hash, X, RotateCw, Video } from 'lucide-react';
+import { Heart, Medal, Trophy, Award, Star, DollarSign, Lightbulb, FileText, MessageCircle, X, RotateCw, Video, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface VotingCardProps {
     applicant: Applicant;
@@ -17,18 +17,29 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
     const [showVoteModal, setShowVoteModal] = useState(false);
     const [voting, setVoting] = useState(false);
     const [youtubeOptIn, setYoutubeOptIn] = useState(false); // 🆕 YouTube出演選択
+    const [showDetailedReason, setShowDetailedReason] = useState(false); // アコーディオン状態
+    const [showThoughts, setShowThoughts] = useState(false); // アコーディオン状態
+    const [isMobile, setIsMobile] = useState(false); // モバイル判定
     const [userForm, setUserForm] = useState({
         financeId: '',
         email: '',
         name: ''
     });
 
-    // コンポーネントマウント時にキャッシュをチェック
+    // コンポーネントマウント時にキャッシュをチェック & モバイル判定
     useEffect(() => {
         const cachedUser = UserSessionManager.getUserSession();
         if (cachedUser) {
             setUserForm(cachedUser);
         }
+
+        // モバイル判定
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     const handleVoteClick = () => {
@@ -158,11 +169,11 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
     };
 
     const getRankColor = (rank: number) => {
-        // 両方のページをダークテーマに統一
-        if (rank === 1) return 'border-l-4 border-yellow-400 bg-gradient-to-r from-gray-900 to-gray-800 text-white';
-        if (rank === 2) return 'border-l-4 border-gray-400 bg-gradient-to-r from-gray-900 to-gray-800 text-white';
-        if (rank === 3) return 'border-l-4 border-orange-400 bg-gradient-to-r from-gray-900 to-gray-800 text-white';
-        return 'border-l-4 border-gray-600 bg-gray-900 text-white';
+        // 蛍光ラインを削除し、白枠とグラデーション背景に変更
+        if (rank === 1) return 'border border-white/20 bg-gradient-to-br from-yellow-900/30 to-gray-900 text-white shadow-lg';
+        if (rank === 2) return 'border border-white/20 bg-gradient-to-br from-gray-800/50 to-gray-900 text-white shadow-lg';
+        if (rank === 3) return 'border border-white/20 bg-gradient-to-br from-orange-900/30 to-gray-900 text-white shadow-lg';
+        return 'border border-white/10 bg-gradient-to-br from-gray-800/30 to-gray-900 text-white shadow-md';
     };
 
     return (
@@ -184,16 +195,6 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
 
                             {/* 申請内容 */}
                             <div className="space-y-3 mb-4">
-                                {/* SNS情報 */}
-                                {applicant.sns && (
-                                    <div className="rounded-lg p-3 bg-gray-800">
-                                        <p className="text-sm font-medium mb-1 text-gray-300 flex items-center gap-2">
-                                            <Hash className="w-4 h-4" />
-                                            SNS
-                                        </p>
-                                        <p className="text-sm text-gray-400">{applicant.sns}</p>
-                                    </div>
-                                )}
 
                                 {/* 支援理由 */}
                                 <div className="rounded-lg p-3 bg-gray-800">
@@ -219,33 +220,77 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
 
                                 {/* 詳細用途 */}
                                 {applicant.detailedReason && (
-                                    <div className="rounded-lg p-3 bg-gray-800">
-                                        <p className="text-sm font-medium mb-1 text-gray-300 flex items-center gap-2">
-                                            <FileText className="w-4 h-4" />
-                                            詳細な使用用途
-                                        </p>
-                                        <p className="text-sm leading-relaxed text-gray-400">
-                                            {applicant.detailedReason.length > 150 
-                                                ? `${applicant.detailedReason.substring(0, 150)}...` 
-                                                : applicant.detailedReason
-                                            }
-                                        </p>
+                                    <div className="rounded-lg bg-gray-800">
+                                        <button
+                                            onClick={() => setShowDetailedReason(!showDetailedReason)}
+                                            className="w-full p-3 text-left hover:bg-gray-700 transition-colors rounded-lg"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                                    <FileText className="w-4 h-4" />
+                                                    詳細な使用用途
+                                                </p>
+                                                {showDetailedReason ? 
+                                                    <ChevronUp className="w-4 h-4 text-gray-400" /> : 
+                                                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                                                }
+                                            </div>
+                                        </button>
+                                        {showDetailedReason && (
+                                            <div className="px-3 pb-3">
+                                                <p className="text-sm leading-relaxed text-gray-400 whitespace-pre-line">
+                                                    {applicant.detailedReason}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {!showDetailedReason && (
+                                            <div className="px-3 pb-3">
+                                                <p className="text-sm leading-relaxed text-gray-400 whitespace-pre-line">
+                                                    {applicant.detailedReason.length > (isMobile ? 75 : 150) 
+                                                        ? `${applicant.detailedReason.substring(0, isMobile ? 75 : 150)}...` 
+                                                        : applicant.detailedReason
+                                                    }
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
                                 {/* 応募への想い */}
                                 {applicant.thoughts && (
-                                    <div className="rounded-lg p-3 bg-gray-800">
-                                        <p className="text-sm font-medium mb-1 text-gray-300 flex items-center gap-2">
-                                            <MessageCircle className="w-4 h-4" />
-                                            応募への想い
-                                        </p>
-                                        <p className="text-sm leading-relaxed text-gray-400">
-                                            {applicant.thoughts.length > 150 
-                                                ? `${applicant.thoughts.substring(0, 150)}...` 
-                                                : applicant.thoughts
-                                            }
-                                        </p>
+                                    <div className="rounded-lg bg-gray-800">
+                                        <button
+                                            onClick={() => setShowThoughts(!showThoughts)}
+                                            className="w-full p-3 text-left hover:bg-gray-700 transition-colors rounded-lg"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                                    <MessageCircle className="w-4 h-4" />
+                                                    応募への想い
+                                                </p>
+                                                {showThoughts ? 
+                                                    <ChevronUp className="w-4 h-4 text-gray-400" /> : 
+                                                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                                                }
+                                            </div>
+                                        </button>
+                                        {showThoughts && (
+                                            <div className="px-3 pb-3">
+                                                <p className="text-sm leading-relaxed text-gray-400 whitespace-pre-line">
+                                                    {applicant.thoughts}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {!showThoughts && (
+                                            <div className="px-3 pb-3">
+                                                <p className="text-sm leading-relaxed text-gray-400 whitespace-pre-line">
+                                                    {applicant.thoughts.length > (isMobile ? 75 : 150) 
+                                                        ? `${applicant.thoughts.substring(0, isMobile ? 75 : 150)}...` 
+                                                        : applicant.thoughts
+                                                    }
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
