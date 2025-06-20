@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEB3 MONEY リファラーテスト用ページ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        .test-info {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .test-links {
+            display: grid;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .test-link {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        .test-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        .warning {
+            background: rgba(255, 193, 7, 0.3);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success {
+            background: rgba(40, 167, 69, 0.3);
+            border: 2px solid rgba(40, 167, 69, 0.5);
+        }
+        .error {
+            background: rgba(220, 53, 69, 0.3);
+            border: 2px solid rgba(220, 53, 69, 0.5);
+        }
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 WEB3 MONEY リファラーテスト</h1>
+        
+        <div class="test-info">
+            <h3>📋 テスト目的</h3>
+            <p>このページはWEB3 MONEYシステムのリファラーチェック機能をテストするためのものです。</p>
+            <p>このページから以下のリンクをクリックすることで、リファラーが正しく送信されるかテストできます。</p>
+        </div>
+
+        <div class="warning">
+            <h4>⚠️ 現在のドメイン情報</h4>
+            <p><strong>このページのURL:</strong> <code id="current-url"></code></p>
+            <p><strong>このページのドメイン:</strong> <code id="current-domain"></code></p>
+        </div>
+
+        <div class="test-links">
+            <h3>🎯 テスト用リンク</h3>
+            
+            <a href="https://web3-money-pd2hfv2z8-tenchan000517s-projects.vercel.app/relay-basic" 
+               class="test-link" 
+               target="_blank">
+                🔵 基本契約者ページテスト (relay-basic)
+            </a>
+            
+            <a href="https://web3-money-pd2hfv2z8-tenchan000517s-projects.vercel.app/relay-premium" 
+               class="test-link" 
+               target="_blank">
+                🟡 プレミアム契約者ページテスト (relay-premium)
+            </a>
+            
+            <a href="https://web3-money-pd2hfv2z8-tenchan000517s-projects.vercel.app/main-basic" 
+               class="test-link" 
+               target="_blank">
+                🔒 メインページ直接アクセステスト (main-basic)
+            </a>
+        </div>
+
+        <div class="test-info">
+            <h3>📊 期待される結果</h3>
+            <div class="success">
+                <strong>✅ 成功ケース:</strong><br>
+                • relay-basic, relay-premium → 3秒後に自動遷移<br>
+                • リファラーチェックが通過する場合
+            </div>
+            <div class="error">
+                <strong>❌ 失敗ケース:</strong><br>
+                • main-basic 直接アクセス → エラー画面表示<br>
+                • 不正リファラーの場合 → アクセス拒否画面
+            </div>
+        </div>
+
+        <div class="warning">
+            <h4>🔧 開発者向け情報</h4>
+            <p><strong>許可されたリファラー:</strong></p>
+            <ul style="text-align: left;">
+                <li><code>xmobile.ne.jp/customer/</code></li>
+                <li><code>xmobile.ne.jp/thanks/</code></li>
+                <li><code>xmobile.ne.jp/mypage/</code></li>
+                <li><code>localhost</code></li>
+                <li><code>127.0.0.1</code></li>
+                <li><strong>このテストページのドメイン（追加テスト用）</strong></li>
+            </ul>
+        </div>
+
+        <div class="test-info">
+            <h3>📝 テスト手順</h3>
+            <ol style="text-align: left;">
+                <li>上記のリンクをクリック</li>
+                <li>遷移先でリファラーチェックの結果を確認</li>
+                <li>コンソールログでリファラー値を確認</li>
+                <li>成功/失敗の動作を記録</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // 現在のURL情報を表示
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('current-domain').textContent = window.location.hostname;
+        
+        // リンククリック時の情報を記録
+        document.querySelectorAll('.test-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                console.log('🔗 リンククリック:', this.href);
+                console.log('📨 送信されるリファラー:', window.location.href);
+                console.log('🌐 現在のドメイン:', window.location.hostname);
+            });
+        });
+    </script>
+</body>
+</html>
