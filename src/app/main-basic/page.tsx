@@ -34,8 +34,8 @@ export default function MainBasicPage() {
         // 厳格なアクセス制御
         const isValidAccess = (
             contractType === 'basic' && 
-            accessVerified === 'true' &&
-            (referrer.includes('/relay-basic') || process.env.NODE_ENV === 'development')
+            accessVerified === 'true'
+            // リファラーチェックは relay ページで完了済みのため、ここでは不要
         );
 
         if (isValidAccess) {

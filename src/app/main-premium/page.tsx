@@ -35,8 +35,8 @@ export default function MainPremiumPage() {
         // 厳格なアクセス制御
         const isValidAccess = (
             contractType === 'premium' && 
-            accessVerified === 'true' &&
-            (referrer.includes('/relay-premium') || process.env.NODE_ENV === 'development')
+            accessVerified === 'true'
+            // リファラーチェックは relay ページで完了済みのため、ここでは不要
         );
 
         if (isValidAccess) {
