@@ -30,6 +30,7 @@ export default function MainBasicPage() {
         console.log('MainBasic - Contract Type:', contractType);
         console.log('MainBasic - Access Verified:', accessVerified);
         console.log('MainBasic - Referrer:', referrer);
+        console.log('MainBasic - Debug:', { contractType, accessVerified, typeofContract: typeof contractType, typeofAccess: typeof accessVerified });
 
         // 厳格なアクセス制御
         const isValidAccess = (
