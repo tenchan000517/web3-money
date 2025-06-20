@@ -414,25 +414,39 @@ export const getApplicantsFromReadonlyGAS = async (): Promise<Applicant[]> => {
                     
                     console.log('💰 金額正規化前:', amountStr);
                     
-                    const str = amountStr.toString().toLowerCase();
+                    // 全角数字を半角数字に変換
+                    const convertFullWidthToHalf = (str: string): string => {
+                        return str.replace(/[０-９]/g, (s) => {
+                            return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+                        });
+                    };
+                    
+                    let str = amountStr.toString().toLowerCase();
+                    str = convertFullWidthToHalf(str); // 全角→半角変換
+                    console.log('💰 全角→半角変換後:', str);
+                    
                     let finalAmount = 0;
                     
                     // 万円の処理
                     if (str.includes('万')) {
-                        // 「１０万円」「250万円」等
+                        // 「10万円」「250万円」等
                         const beforeMan = str.split('万')[0];
                         const numStr = beforeMan.replace(/[^0-9]/g, '');
+                        console.log('💰 万円処理 - 抽出数値:', numStr);
                         const manNum = parseInt(numStr);
                         if (!isNaN(manNum)) {
                             finalAmount = manNum * 10000;
+                            console.log('💰 万円処理 - 最終金額:', finalAmount);
                         }
                     } 
                     // 通常の数値（「50,000円」等）
                     else {
                         const numStr = str.replace(/[^0-9]/g, '');
+                        console.log('💰 通常処理 - 抽出数値:', numStr);
                         const num = parseInt(numStr);
                         if (!isNaN(num)) {
                             finalAmount = num;
+                            console.log('💰 通常処理 - 最終金額:', finalAmount);
                         }
                     }
                     
