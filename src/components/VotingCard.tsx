@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Applicant } from '@/lib/types';
 import { addAuthenticatedVote, UserSessionManager } from '@/lib/api';
-import { Heart, Medal, Trophy, Award, Star, Lightbulb, FileText, MessageCircle, X, RotateCw, Video, ChevronDown, ChevronUp } from 'lucide-react';
+import { Heart, Medal, Trophy, Award, Star, Lightbulb, FileText, MessageCircle, X, RotateCw, Video, ChevronDown } from 'lucide-react';
 
 interface VotingCardProps {
     applicant: Applicant;
@@ -218,77 +218,61 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
 
                                 {/* 詳細用途 */}
                                 {applicant.detailedReason && (
-                                    <div className="rounded-lg bg-gray-800">
-                                        <button
-                                            onClick={() => setShowDetailedReason(!showDetailedReason)}
-                                            className="w-full p-3 text-left hover:bg-gray-700 transition-colors rounded-lg"
-                                        >
+                                    <div 
+                                        onClick={() => setShowDetailedReason(!showDetailedReason)}
+                                        className="rounded-lg bg-gray-800 cursor-pointer hover:bg-gray-750 transition-colors duration-200"
+                                    >
+                                        <div className="p-3">
                                             <div className="flex items-center justify-between">
                                                 <p className="text-sm font-medium text-gray-300 flex items-center gap-2">
                                                     <FileText className="w-4 h-4" />
                                                     詳細な使用用途
                                                 </p>
-                                                {showDetailedReason ? 
-                                                    <ChevronUp className="w-4 h-4 text-gray-400" /> : 
+                                                <div className={`transform transition-transform duration-300 ease-out ${
+                                                    showDetailedReason ? 'rotate-180' : ''
+                                                }`}>
                                                     <ChevronDown className="w-4 h-4 text-gray-400" />
-                                                }
+                                                </div>
                                             </div>
-                                        </button>
-                                        {showDetailedReason && (
-                                            <div className="px-3 pb-3">
+                                            
+                                            <div className={`mt-3 transition-all duration-500 ease-in-out overflow-hidden ${
+                                                showDetailedReason ? 'max-h-[2000px]' : 'max-h-16'
+                                            }`}>
                                                 <p className="text-sm leading-relaxed text-gray-400 whitespace-pre-line">
                                                     {applicant.detailedReason}
                                                 </p>
                                             </div>
-                                        )}
-                                        {!showDetailedReason && (
-                                            <div className="px-3 pb-3">
-                                                <p className="text-sm leading-relaxed text-gray-400 whitespace-pre-line">
-                                                    {applicant.detailedReason.length > (isMobile ? 75 : 150) 
-                                                        ? `${applicant.detailedReason.substring(0, isMobile ? 75 : 150)}...` 
-                                                        : applicant.detailedReason
-                                                    }
-                                                </p>
-                                            </div>
-                                        )}
+                                        </div>
                                     </div>
                                 )}
 
                                 {/* 応募への想い */}
                                 {applicant.thoughts && (
-                                    <div className="rounded-lg bg-gray-800">
-                                        <button
-                                            onClick={() => setShowThoughts(!showThoughts)}
-                                            className="w-full p-3 text-left hover:bg-gray-700 transition-colors rounded-lg"
-                                        >
+                                    <div 
+                                        onClick={() => setShowThoughts(!showThoughts)}
+                                        className="rounded-lg bg-gray-800 cursor-pointer hover:bg-gray-750 transition-colors duration-200"
+                                    >
+                                        <div className="p-3">
                                             <div className="flex items-center justify-between">
                                                 <p className="text-sm font-medium text-gray-300 flex items-center gap-2">
                                                     <MessageCircle className="w-4 h-4" />
                                                     応募への想い
                                                 </p>
-                                                {showThoughts ? 
-                                                    <ChevronUp className="w-4 h-4 text-gray-400" /> : 
+                                                <div className={`transform transition-transform duration-300 ease-out ${
+                                                    showThoughts ? 'rotate-180' : ''
+                                                }`}>
                                                     <ChevronDown className="w-4 h-4 text-gray-400" />
-                                                }
+                                                </div>
                                             </div>
-                                        </button>
-                                        {showThoughts && (
-                                            <div className="px-3 pb-3">
+                                            
+                                            <div className={`mt-3 transition-all duration-500 ease-in-out overflow-hidden ${
+                                                showThoughts ? 'max-h-[2000px]' : 'max-h-16'
+                                            }`}>
                                                 <p className="text-sm leading-relaxed text-gray-400 whitespace-pre-line">
                                                     {applicant.thoughts}
                                                 </p>
                                             </div>
-                                        )}
-                                        {!showThoughts && (
-                                            <div className="px-3 pb-3">
-                                                <p className="text-sm leading-relaxed text-gray-400 whitespace-pre-line">
-                                                    {applicant.thoughts.length > (isMobile ? 75 : 150) 
-                                                        ? `${applicant.thoughts.substring(0, isMobile ? 75 : 150)}...` 
-                                                        : applicant.thoughts
-                                                    }
-                                                </p>
-                                            </div>
-                                        )}
+                                        </div>
                                     </div>
                                 )}
 
