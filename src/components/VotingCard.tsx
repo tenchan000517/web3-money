@@ -186,7 +186,6 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                             <div className="flex items-center gap-3 mb-3">
                                 {rank <= 10 && getRankIcon(rank)}
                                 <div className="flex items-center gap-2">
-                                    <span className="text-sm font-medium text-gray-400">#{rank}</span>
                                     <h3 className="text-lg font-semibold text-white">
                                         {getName()}
                                     </h3>
@@ -210,10 +209,9 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                 {/* 希望金額 */}
                                 <div className="flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-gray-300 text-sm font-bold">¥</span>
                                         <span className="font-medium text-gray-300">希望金額:</span>
                                         <span className="text-lg font-semibold text-green-400 font-mono">
-                                            ¥{applicant.amount || '0'}
+                                            {applicant.amount || '0'}
                                         </span>
                                     </div>
                                 </div>
@@ -370,7 +368,7 @@ export default function VotingCard({ applicant, campaignId, rank, onVoteSuccess,
                                     <span className="font-medium">理由:</span> {getReason()}
                                 </p>
                                 <p className="text-sm text-gray-600">
-                                    <span className="font-medium">金額:</span> ¥{getAmount().toLocaleString()}
+                                    <span className="font-medium">金額:</span> {getAmount().toLocaleString()}
                                 </p>
                             </div>
 

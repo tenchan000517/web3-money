@@ -66,8 +66,23 @@ export default function MainPageContent({ contractType, theme }: MainPageContent
 
     const getSortedApplicants = () => {
         if (!applicants || applicants.length === 0) return [];
-        return [...applicants].sort((a, b) => {
-            return (b.voteCount || 0) - (a.voteCount || 0);
+        
+        // 票数でソート
+        const sorted = [...applicants].sort((a, b) => (b.voteCount || 0) - (a.voteCount || 0));
+        
+        // 全員0票の場合は全員1位
+        const hasAnyVotes = sorted.some(applicant => (applicant.voteCount || 0) > 0);
+        if (!hasAnyVotes) {
+            return sorted.map(applicant => ({ ...applicant, rank: 1 }));
+        }
+        
+        // 通常のランキング処理（同順位対応）
+        let currentRank = 1;
+        return sorted.map((applicant, index) => {
+            if (index > 0 && sorted[index - 1].voteCount !== applicant.voteCount) {
+                currentRank = index + 1;
+            }
+            return { ...applicant, rank: currentRank };
         });
     };
 
@@ -296,12 +311,12 @@ export default function MainPageContent({ contractType, theme }: MainPageContent
                                 </div>
                             ) : (
                                 <div className="space-y-6">
-                                    {getSortedApplicants().map((applicant, index) => (
+                                    {getSortedApplicants().map((applicant) => (
                                         <VotingCard
                                             key={applicant.id}
                                             applicant={applicant}
                                             campaignId="test-readonly-campaign"
-                                            rank={index + 1}
+                                            rank={applicant.rank || 1}
                                             onVoteSuccess={handleVoteSuccess}
                                             votePage={contractType}
                                         />

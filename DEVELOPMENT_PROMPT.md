@@ -30,8 +30,8 @@
 - プライベートスプレッドシート（専用GAS）でデータ管理
 
 【現在の進行状況】
-Phase: UI/UX最終調整必要 ⚠️ (コミット: f367d93)
-Next: **UI最終調整** → プライベート投票GAS連携テスト → 本番環境リリース準備
+Phase: 投票ランキングロジック調整必要 ⚠️ (コミット: ece28a4)
+Next: **ランキング同順位対応** → プライベート投票GAS連携テスト → 本番環境リリース準備
 
 【最新完了事項】2025年6月20日 21:00
 ✅ プライベート投票システム完全実装 (private-votes.gs)
@@ -43,6 +43,8 @@ Next: **UI最終調整** → プライベート投票GAS連携テスト → 本�
 ✅ UI改善（不要フィールド削除、フォント統一）
 ✅ **絵文字→Lucideアイコン統一完了** - アクセシビリティとUI一貫性向上
 ✅ ナレッジベース作成・他プロジェクト共有
+✅ **投票UI最終調整完了** - 横並び投票数、RANK表記、アイコンサイズ統一
+✅ **TypeScript型エラー完全修正** - 全ての型安全性確保
 
 【デプロイ済みGAS】
 ✅ 読み取り専用GAS: https://script.google.com/macros/s/AKfycbzqF7tHHQ9prKEA8jwwSQI0c90Ui3cUSKsG4_KVBjDpTeWi5K1Ejiux7k7INMgU_oI3/exec
@@ -50,21 +52,16 @@ Next: **UI最終調整** → プライベート投票GAS連携テスト → 本�
 ✅ NEXT_PUBLIC_GAS_API_URL=https://script.google.com/macros/s/AKfycbxlvP4m_u9njP07uizQ42BiurLLFpLrKt0QXmJxOMPG2I4M8QqfclsUSwNecD3t_9WXBg/exec
 
 【🚨 緊急修正タスク】
-1. **UI/UX最終調整**（最優先）
-   - VotingCard: 詳細な仕様用途をアコーディオンUIに変更
-   - VotingCard: 応募への想いをアコーディオンUIに変更
-   - モバイル対応: テキストスライス行数調整（PCは現状維持、モバイルは少し短く）
-   - SNS欄完全削除（VotingCardから）
-   - 全体デザイン: 黒背景テーマに統一（現在は投票カードのみ黒背景）
-     * MainPageContentの背景を黒に変更
-     * 各コンテナを黒背景に合わせて調整
-     * テキスト色を白系に調整
-   - モバイル最適化:
-     * ヘッダーサイズ縮小
-     * モバイルではヘッダータイトル非表示
-   - 技術的修正:
-     * favicon.ico問題修正（conflicting public file error）
-     * 「テスト表示」表記を完全削除
+1. **投票ランキングロジック修正**（最優先）
+   - 同順位対応の実装
+     * 全員0票の場合は全員1位表示
+     * 1票以上ある場合は通常のランキング処理
+     * 同じ票数の場合は同じ順位を付与
+     * 次の順位は適切にスキップ（例: 1位1人、2位2人の次は4位）
+   - UI表示改善
+     * 名前横の「#」記号を削除（ダサいため）
+     * 希望金額の「￥」記号を削除（ダサいため）
+     * よりクリーンなUIデザインに調整
 
 2. **プライベート投票GAS連携テスト**
    - 実際の投票機能動作確認
@@ -122,7 +119,10 @@ Next: **UI最終調整** → プライベート投票GAS連携テスト → 本�
 ```
 
 ### 必須テスト項目
-1. UI/UX最終調整の動作確認
+1. **投票ランキングロジック確認**
+   - 全員0票時の全員1位表示
+   - 同票数時の同順位表示
+   - 順位スキップの正確性確認
 2. プライベート投票GAS連携テスト
 3. 重み付き投票機能の動作確認
 4. 重複投票防止機能
@@ -131,43 +131,43 @@ Next: **UI最終調整** → プライベート投票GAS連携テスト → 本�
 
 ### 🎯 緊急修正詳細
 
-#### VotingCard.tsx 修正項目
+#### 投票ランキングロジック修正項目
 ```typescript
-// 1. SNS欄完全削除
-// applicant.sns関連のコードを全て削除
+// MainPageContent.tsx の getSortedApplicants 関数を修正
 
-// 2. アコーディオンUI実装
-// 詳細な仕様用途（detailedReason）
-// 応募への想い（thoughts）
-// useStateでアコーディオン開閉状態管理
+// 1. 同順位対応のランキング計算
+const getSortedApplicantsWithRanking = () => {
+    if (!applicants || applicants.length === 0) return [];
+    
+    // 票数でソート
+    const sorted = [...applicants].sort((a, b) => (b.voteCount || 0) - (a.voteCount || 0));
+    
+    // 全員0票の場合は全員1位
+    const hasAnyVotes = sorted.some(applicant => (applicant.voteCount || 0) > 0);
+    if (!hasAnyVotes) {
+        return sorted.map(applicant => ({ ...applicant, rank: 1 }));
+    }
+    
+    // 通常のランキング処理（同順位対応）
+    let currentRank = 1;
+    return sorted.map((applicant, index) => {
+        if (index > 0 && sorted[index - 1].voteCount !== applicant.voteCount) {
+            currentRank = index + 1;
+        }
+        return { ...applicant, rank: currentRank };
+    });
+};
 
-// 3. モバイル対応テキストスライス
-// PC: 現状維持（150文字）
-// モバイル: 75-100文字程度に短縮
-// useEffect + window.innerWidthで判定
+// 2. VotingCard.tsx の表示修正
+// 名前横の「#」削除: <span className="text-sm font-medium text-gray-400">#{rank}</span> → 削除
+// 希望金額の「￥」削除: <span className="text-gray-300 text-sm font-bold">￥</span> → 削除
 ```
 
-#### MainPageContent.tsx 修正項目
-```typescript
-// 1. 黒背景テーマ統一
-// min-h-screen の background を黒に変更
-// 各コンテナのbg-whiteをbg-gray-800等に変更
-// text-gray-800をtext-white等に変更
-
-// 2. モバイルヘッダー最適化
-// ヘッダーサイズ縮小
-// モバイルでタイトル非表示
-// useEffect + window.innerWidthで判定
-
-// 3. テスト表示削除
-// "テスト表示"関連のテキストとコンテナを完全削除
-```
-
-#### favicon修正
+#### 修正対象ファイル
 ```bash
-# public/favicon.ico の conflicting file エラー修正
-# pages/favicon.ico があれば削除
-# public/favicon.ico を適切に配置
+# 主要修正ファイル:
+# - src/components/MainPageContent.tsx (ランキングロジック)
+# - src/components/VotingCard.tsx (UI表示改善)
 ```
 
 ### UI/UX実装完了
@@ -179,13 +179,16 @@ Next: **UI最終調整** → プライベート投票GAS連携テスト → 本�
 ✅ VotingCard: Trophy, Medal, Award等ランキングアイコン
 ✅ NoticeList: Megaphoneアイコン
 ✅ CampaignTabs: Lightbulb, Clock, Voteアイコン
+✅ VotingCardアコーディオンUI実装完了
+✅ 黒背景テーマ統一完了
+✅ モバイル最適化完了
+✅ SNS欄削除完了
+✅ favicon修正完了
+✅ TypeScript型エラー全修正完了
 
 ⚠️ 緊急修正必要:
-- VotingCardアコーディオンUI
-- 黒背景テーマ統一
-- モバイル最適化
-- SNS欄削除
-- favicon修正
+- 投票ランキングロジック（同順位対応）
+- UI表示クリーンアップ（#、￥記号削除）
 ```
 
 ### Git管理
@@ -198,9 +201,12 @@ Next: **UI最終調整** → プライベート投票GAS連携テスト → 本�
 - ✅ **新アーキテクチャ実装完了** - プライバシー保護システム稼働中
 - ✅ **シミュレーションテスト成功** - 全機能動作確認済み
 - ✅ **フロントエンドUI改善完了** - Lucideアイコン統一済み
+- ✅ **UI/UX最終調整完了** - アコーディオン、黒背景統一、モバイル最適化完了
+- ✅ **TypeScript型エラー完全修正** - 全ての型安全性確保完了
 
 ### 次回重要課題
-- 🚨 **UI/UX最終調整実行** - アコーディオン、黒背景統一、モバイル最適化が最優先
+- 🚨 **投票ランキングロジック修正** - 同順位対応実装が最優先
+- 🚨 **UI表示クリーンアップ** - #記号、￥記号削除
 - ❗ **プライベート投票GAS連携テスト実行** - 実際の投票動作確認
 - ❗ **重み付き投票システムの動作確認** - basic:1, premium:5の重み機能
 - ❗ **エラーハンドリング強化** - ユーザーフレンドリーなエラー表示
@@ -227,9 +233,8 @@ npm run dev -- --port 3001  # 開発サーバー起動
 3. **修正対象ファイル**
 ```bash
 # 主要修正ファイル:
-# - src/components/VotingCard.tsx (アコーディオン、SNS削除、モバイル対応)
-# - src/components/MainPageContent.tsx (黒背景統一、モバイルヘッダー、テスト表記削除)
-# - public/favicon.ico (favicon問題修正)
+# - src/components/MainPageContent.tsx (ランキングロジック修正)
+# - src/components/VotingCard.tsx (UI表示クリーンアップ)
 ```
 
 4. **修正完了後**
@@ -243,12 +248,15 @@ npm run dev -- --port 3001  # 開発サーバー起動
 - ✅ **シミュレーションテスト成功**
 - ✅ **セキュリティ要件達成**
 - ✅ **基本UI/UX改善完了**
+- ✅ **VotingCard UI最適化完了**
+- ✅ **黒背景テーマ統一完了**
+- ✅ **モバイル最適化完了**
+- ✅ **技術的修正完了**
+- ✅ **TypeScript型エラー全修正完了**
 
 ### 緊急修正必要
-- ⚠️ **VotingCard UI最適化**
-- ⚠️ **黒背景テーマ統一**
-- ⚠️ **モバイル最適化**
-- ⚠️ **技術的修正**
+- ⚠️ **投票ランキングロジック修正**
+- ⚠️ **UI表示クリーンアップ**
 
 ---
 
