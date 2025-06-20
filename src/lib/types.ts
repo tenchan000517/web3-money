@@ -178,6 +178,88 @@ export interface UserSessionCache {
     cachedAt: number; // タイムスタンプ
 }
 
+// 🆕 プライベート投票システム関連型定義
+export interface PrivateVoteData {
+    id: string;
+    financeId: string;
+    email: string;
+    name: string;
+    campaignId: string;
+    applicantId: string;
+    votePage: 'basic' | 'premium';
+    voteWeight: number; // バックエンドでのみ使用、フロントエンドには非送信
+    youtubeOptIn: boolean;
+    timestamp: string;
+    ipHash?: string; // セキュリティ用IPハッシュ
+    sessionId?: string; // セッション識別用
+}
+
+export interface PrivateVoteRequest {
+    financeId: string;
+    email: string;
+    name: string;
+    campaignId: string;
+    applicantId: string;
+    votePage: 'basic' | 'premium';
+    youtubeOptIn?: boolean;
+}
+
+export interface PrivateVoteResponse {
+    success: boolean;
+    voteId?: string;
+    message: string;
+    // 重み情報は絶対に含めない
+}
+
+export interface PrivateVoteAggregation {
+    [applicantId: string]: {
+        totalVotes: number;
+        weightedScore: number; // 管理者専用
+        basicVotes: number;
+        premiumVotes: number;
+        youtubeOptIns: number;
+    };
+}
+
+export interface PrivateConnectionTestResult {
+    status: 'ok' | 'error';
+    message: string;
+    timestamp: string;
+    features?: string[];
+    note?: string;
+    error?: string;
+}
+
+// 🆕 重複投票チェック結果
+export interface DuplicateVoteCheck {
+    isDuplicate: boolean;
+    reason?: string;
+    existingVotePage?: 'basic' | 'premium';
+}
+
+// 🆕 投票セキュリティ設定
+export interface VoteSecurityConfig {
+    enableIPValidation: boolean;
+    enableSessionTracking: boolean;
+    maxVotesPerSession: number;
+    enableEmailDomainRestriction: boolean;
+    allowedEmailDomains: string[];
+    enableTimestampValidation: boolean;
+    voteTimeWindowMinutes: number;
+}
+
+// 🆕 管理者専用投票データ
+export interface AdminVoteDataResponse {
+    success: boolean;
+    totalVotes: number;
+    aggregation: PrivateVoteAggregation;
+    securityFlags?: {
+        suspiciousVotes: number;
+        duplicateAttempts: number;
+        invalidEmails: number;
+    };
+}
+
 // エラー型
 export interface ApiError extends Error {
     status?: number;

@@ -119,6 +119,29 @@ function handleRequest(method, params, data = null) {
         );
         break;
         
+      // プライベート投票API（新セキュリティシステム）
+      case 'POST:private-vote':
+        result = addPrivateVote(
+          data.financeId,
+          data.email,
+          data.name,
+          data.campaignId,
+          data.applicantId,
+          data.votePage,
+          data.youtubeOptIn || false
+        );
+        break;
+        
+      // プライベート投票データ取得（管理者専用）
+      case 'GET:private-vote-data':
+        result = getPrivateVoteData(params.campaignId, params.adminKey);
+        break;
+        
+      // プライベートスプレッドシート接続テスト
+      case 'POST:test-private-connection':
+        result = testPrivateConnection();
+        break;
+        
       // フォーム連携API
       case 'POST:form-fields':
         result = getFormFields(data.sheetUrl);
@@ -376,4 +399,41 @@ function logError(message, error = null) {
 function logDebug(message, data = null) {
   const timestamp = new Date().toISOString();
   console.log(`[DEBUG ${timestamp}] ${message}`, data || '');
+}
+
+/**
+ * プライベートスプレッドシート接続テスト
+ */
+function testPrivateConnection() {
+  try {
+    logInfo('Testing private spreadsheet connection');
+    
+    // プライベート投票システム初期化テスト
+    const initResult = initializePrivateSpreadsheet();
+    
+    if (initResult.success) {
+      return {
+        status: 'ok',
+        message: 'プライベートスプレッドシート接続成功',
+        timestamp: getCurrentTimestamp(),
+        features: [
+          'プライベート投票記録',
+          'セキュリティ強化',
+          '重み計算（非表示）',
+          'メールベース重複制御'
+        ]
+      };
+    } else {
+      throw new Error('初期化に失敗しました: ' + initResult.error);
+    }
+    
+  } catch (error) {
+    logError('Private connection test failed', error);
+    return {
+      status: 'error',
+      message: 'プライベートスプレッドシート接続失敗',
+      error: error.toString(),
+      timestamp: getCurrentTimestamp()
+    };
+  }
 }

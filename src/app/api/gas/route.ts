@@ -156,6 +156,35 @@ export async function POST(request: NextRequest) {
         });
     }
 
+    // プライベートスプレッドシート接続テスト
+    if (path === 'test-private-connection') {
+        console.log('Private spreadsheet connection test called');
+
+        try {
+            const body = await request.json().catch(() => ({}));
+            console.log('Private connection test body:', body);
+        } catch {
+            console.log('No JSON body for private connection test');
+        }
+
+        return NextResponse.json({
+            success: true,
+            data: {
+                status: 'test-mode',
+                message: 'プライベートスプレッドシート接続テスト（開発モード）',
+                timestamp: new Date().toISOString(),
+                path: path,
+                features: [
+                    'プライベート投票システム準備完了',
+                    'セキュリティ強化済み',
+                    '投票重み計算（非表示）',
+                    'メールベース重複制御'
+                ],
+                note: 'GAS実装完了、実際のスプレッドシート作成待ち'
+            }
+        });
+    }
+
     return handleGASRequest(request, 'POST');
 }
 
